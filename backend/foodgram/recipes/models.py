@@ -1,42 +1,58 @@
-from djangoHexadecimal.fields import HexadecimalField
+# from djangoHexadecimal.fields import HexadecimalField  # TODO delete this package from the project
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 
 
+# import csv  # TODO delete for csv import
+
 User = get_user_model()
 
 
 class Tag(models.Model):
-    BREAKFAST = 'BR'
-    DINNER = 'DN'
-    SUPPER = 'SP'
-    MEAL_TYPE = [
-        (BREAKFAST, 'Breakfast'),
-        (DINNER, 'Dinner '),
-        (SUPPER, 'Supper'),
-    ]
     name = models.CharField(
-        max_length=2,
-        choices=MEAL_TYPE,
+        # max_length=2,
+        # choices=MEAL_TYPE,
+        max_length=20,
         verbose_name='Название тега',
     )
-    hex_color = HexadecimalField(
-        max_length='8',
+    hex_color = models.CharField(
+        max_length=8,
+        # validators=[(),],  # TODO write own HEX validator and delete hexfield from the project
         verbose_name='Цвет в HEX-кодировке',
     )
+    slug = models.CharField(  # TODO auto-fill and check existing slugs (custom validator?)
+        max_length=32,
+        verbose_name='Slug-адрес',
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название ингредиента'
+    )
+    units = models.CharField(
+        max_length=12,
+        verbose_name='Единица измерения',
+    )
+
+#  TODO delete this import
+# with open('/home/bluetip/dev/foodgram-project-react/data/ingredients.csv') as f:
+#     reader = csv.reader(f)
+#     for i, row in enumerate(reader):
+#         _, created = Ingredient.objects.get_or_create(
+#             id=i + 1,
+#             name=row[0],
+#             units=row[1],
+#         )
 
 
 class Recipe(models.Model):
-    BREAKFAST = 'BR'
-    DINNER = 'DN'
-    SUPPER = 'SP'
-    MEAL_TYPE = [
-        (BREAKFAST, 'Breakfast'),
-        (DINNER, 'Dinner '),
-        (SUPPER, 'Supper'),
-    ]
-    name = models.TextField(
+    name = models.CharField(
         max_length=100,
         verbose_name='Название блюда'
     )
@@ -46,40 +62,33 @@ class Recipe(models.Model):
         on_delete=models.PROTECT,
         verbose_name='Автор',
     )
-    picture = models.ImageField(
-        verbose_name='Фотография готового блюда',
-    )
-    recipe = models.TextField(
+    text = models.TextField(
         max_length=500,
         verbose_name='Рецепт',
     )
-    ingredients = models.CharField(
-        max_length=50,
+    ingredients = models.ManyToManyField(
+        Ingredient,  # TODO UniqueConstraint?
+        through='IngredientQuantity',
+        related_name='recipe',
         verbose_name='Список ингредиентов',
+    )
+    cooking_time = models.PositiveIntegerField(
+        validators=[MaxValueValidator(360)],
+        verbose_name='Время приготовления'
+    )
+    picture = models.ImageField(
+        verbose_name='Фотография готового блюда',
     )
     tag = models.ManyToManyField(
         Tag,
-        max_length=10,
-        choices=MEAL_TYPE,
-        verbose_name='Тип рецепта по времени дня'
-    )
-    cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(0)],
-        max_length=3,
-        verbose_name='Время приготовления'
+        verbose_name='Теги рецепта'
     )
 
 
-class Ingredient(models.Model):
-    name = models.TextField(
-        max_length=100,
-        verbose_name='Название ингредиента'
-    )
+class IngredientQuantity(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(
-        max_length=4,
+        validators=[MaxValueValidator(5000)],
         verbose_name='Количество',
-    )
-    units = models.CharField(
-        max_length='8',
-        verbose_name='Единица измерения',
     )
