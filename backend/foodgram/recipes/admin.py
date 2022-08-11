@@ -68,24 +68,6 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = 'empty'
 
 
-class IngredientQuantityAdmin(admin.ModelAdmin):
-    list_display = ('pk',
-                    'recipe',
-                    'ingredient',
-                    'quantity',
-                    )
-    list_editable = ('recipe',
-                     'ingredient',
-                     'quantity',
-                     )
-    search_fields = ('recipe',
-                     'ingredient',
-                     'quantity',
-                     )
-    empty_value_display = 'empty'
-
-
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(IngredientQuantity, IngredientQuantityAdmin)
