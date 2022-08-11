@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # "rest_framework_simplejwt",
     # Own
     'recipes.apps.RecipesConfig'
+    'users.apps.UsersConfig'
 ]
 
 MIDDLEWARE = [
