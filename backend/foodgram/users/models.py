@@ -10,16 +10,12 @@ class User(AbstractUser):
         (USER, 'User'),
         (ADMIN, 'Admin'),
     ]
-    # email = models.EmailField(
-    #     'email address',
-    #     unique=True,
-    #     blank=False,
-    #     null=False,
-    # )
-    # bio = models.TextField(
-    #     'биография',
-    #     blank=True,
-    # )
+    email = models.EmailField(
+        'email address',
+        unique=True,
+        blank=False,
+        null=False,
+    )
     role = models.CharField(
         'роль на сайте',
         max_length=32,
@@ -30,8 +26,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['-id']
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'пользователи'
+        # verbose_name = 'пользователь'
+        # verbose_name_plural = 'пользователи'
 
     def __str__(self):
         return self.get_full_name()
