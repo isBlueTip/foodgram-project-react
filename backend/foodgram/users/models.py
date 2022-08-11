@@ -31,3 +31,18 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.get_full_name()
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='кто подписался',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='на кого подписка',
+    )
