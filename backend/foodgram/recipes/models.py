@@ -1,5 +1,6 @@
 # from djangoHexadecimal.fields import HexadecimalField  # TODO delete this package from the project
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, admin
+from django.contrib import admin
 from django.core.validators import MaxValueValidator
 from django.db import models
 
@@ -40,6 +41,10 @@ class Ingredient(models.Model):
         verbose_name='Единица измерения',
     )
 
+    def __str__(self):
+        return self.name
+
+
 #  TODO delete this import
 # with open('/home/bluetip/dev/foodgram-project-react/data/ingredients.csv') as f:
 #     reader = csv.reader(f)
@@ -63,7 +68,7 @@ class Recipe(models.Model):
         verbose_name='Автор',
     )
     text = models.TextField(
-        max_length=500,
+        max_length=3000,
         verbose_name='Рецепт',
     )
     ingredients = models.ManyToManyField(
@@ -83,6 +88,28 @@ class Recipe(models.Model):
         Tag,
         verbose_name='Теги рецепта'
     )
+
+    def __str__(self):
+        return self.name
+
+    def get_tags_list(self):  # TODO return tags list for list_display
+        # return Ingredient.objects.get(self)
+        # if isinstance(self.ingredients, int):
+        return self.tag.all().values_list('name')
+        # return 0
+
+    # def get_ingredients_list(self):
+    #     # return Ingredient.objects.get(self)
+    #     if isinstance(self.ingredients, int):
+    #         return self.ingredients
+    #     return 0
+
+    @admin.display(empty_value='unknown')
+    def get_ingredients_list(self):
+        # return Ingredient.objects.get(self)
+        # if isinstance(self.ingredients, int):
+        return self.ingredients.all()#.values_list(flat=True)
+        # return 0
 
 
 class IngredientQuantity(models.Model):
