@@ -1,7 +1,6 @@
-from django import forms
 from django.contrib import admin
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, IngredientQuantity, Recipe, Tag
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -17,51 +16,39 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = 'empty'
 
 
-class TagAdminForm(forms.ModelForm):
-    def formfield_for_tag(self, db_field, request, **kwargs):
-        if db_field.name == 'tag':
-            kwargs['queryset'] = Recipe.objects.filter(tag=request.tag)
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
+class IngredientInline(admin.TabularInline):
 
-
-# class IngredientAdminForm(forms.ModelForm):
-#     def formfield_for_tag(self, db_field, request, **kwargs):
-#         if db_field.name == 'tag':
-#             kwargs['queryset'] = Recipe.objects.filter(tag=request.ingredient)
-#         return super().formfield_for_manytomany(db_field, request, **kwargs)
+    model = IngredientQuantity
+    extra = 1
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    form = TagAdminForm
-    # form = IngredientAdminForm
+    inlines = (IngredientInline,)
     list_display = ('pk',
                     'name',
                     'author',
                     'picture',
                     'text',
-                    # 'ingredients',
+                    'get_ingredients_list',
+                    'get_tags_list',
                     'cooking_time',
-                    # 'tag',
                     )
     list_editable = ('name',
                      'author',
                      'picture',
                      'text',
-                     # 'ingredients',
                      'cooking_time',
-                     # 'tag',
                      )
     search_fields = ('name',
                      'author',
                      'text',
                      # 'ingredients',
                      'cooking_time',
-                     # 'tag',
                      )
-    list_filter = ('cooking_time',
-                   # 'tag',
+    list_filter = ('author',
+                   'cooking_time',
                    )
-    empty_value_display = '-empty-'
+    empty_value_display = 'empty'
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -81,6 +68,24 @@ class TagAdmin(admin.ModelAdmin):
     empty_value_display = 'empty'
 
 
+class IngredientQuantityAdmin(admin.ModelAdmin):
+    list_display = ('pk',
+                    'recipe',
+                    'ingredient',
+                    'quantity',
+                    )
+    list_editable = ('recipe',
+                     'ingredient',
+                     'quantity',
+                     )
+    search_fields = ('recipe',
+                     'ingredient',
+                     'quantity',
+                     )
+    empty_value_display = 'empty'
+
+
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
+admin.site.register(IngredientQuantity, IngredientQuantityAdmin)
