@@ -40,12 +40,12 @@ class RecipeAdmin(admin.ModelAdmin):
                      'cooking_time',
                      )
     search_fields = ('name',
-                     'author',
+                     # 'author__name',  # TODO add lookup method for foreignkey fields
                      'text',
                      # 'ingredients',
                      'cooking_time',
                      )
-    list_filter = ('author',
+    list_filter = ('author',  # TODO same here
                    'cooking_time',
                    )
     empty_value_display = 'empty'
