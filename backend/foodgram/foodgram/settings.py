@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-$t)1g&4t@%_y!8cy_00-o9gud&cc#(xygh+org5i56%7!6$n7_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -61,9 +61,24 @@ ROOT_URLCONF = 'foodgram.urls'
 
 TEMPLATES = [
     {
+        'NAME': 'ADMIN_BACKEND',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+    {
+        'NAME': 'APP_BACKEND',
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': ['/home/bluetip/dev/foodgram-project-react/frontend'],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -135,10 +150,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_ROOT = '/home/bluetip/dev/foodgram-project-react/frontend/static/'
+STATIC_URL = '/static/'
 # MEDIA_URL = 'media/'  # TODO check expression validity
-MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+# PUBLIC_URL = '/home/bluetip/dev/foodgram-project-react/frontend/public/'
 
 AUTH_USER_MODEL = 'users.User'
 
