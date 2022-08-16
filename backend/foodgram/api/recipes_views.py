@@ -2,14 +2,15 @@ import logging
 
 # from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import viewsets  # , status
+# from rest_framework.response import Response
+# from rest_framework.pagination import LimitOffsetPagination
 # from rest_framework.permissions import IsAuthenticated
 
 from loggers import logger, formatter
 # from .permissions import IsOwnerOrReadOnly
 from recipes.models import Recipe, Tag
-from api.serializers import RecipeSerializer, TagSerializer
+from api.recipes_serializers import RecipeSerializer, TagSerializer
 
 
 LOG_NAME = 'api.views.log'
@@ -24,33 +25,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    # pagination_class = PageLimitPagination
-    # permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def retrieve(self, request, *args, **kwargs):
-
-        instance = self.get_object()
-        logger('HERE')
-        print(instance)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-        # serializer = RecipeSerializer(
-        #     data=request.data, context={'request': request})
-        # logger.debug(serializer)
-        # if serializer.is_valid():
-        #     serializer.save(author=request.user)
-        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    # def create(self, request, *args, **kwargs):
-    #     serializer = RecipeSerializer(
-    #         data=request.data, context={'request': request})
-    #     # logger.debug(serializer)
-    #     if serializer.is_valid():
-    #         serializer.save(author=request.user)
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -58,6 +32,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None  # TODO why tags work only wo/ pagination?
 
 
 # class CommentViewSet(viewsets.ModelViewSet):
