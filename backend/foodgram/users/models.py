@@ -30,7 +30,9 @@ class User(AbstractUser):
         # verbose_name_plural = 'пользователи'
 
     def __str__(self):
-        return self.get_full_name()
+        if self.get_full_name():
+            return self.get_full_name()
+        return self.username
 
 
 class Follow(models.Model):
