@@ -12,8 +12,6 @@ User = get_user_model()
 
 class Tag(models.Model):
     name = models.CharField(
-        # max_length=2,
-        # choices=MEAL_TYPE,
         max_length=20,
         verbose_name='Название тега',
     )
@@ -84,13 +82,10 @@ class Recipe(models.Model):
     picture = models.ImageField(
         verbose_name='Фотография готового блюда',
     )
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги рецепта'
     )
-
-    def __str__(self):
-        return self.name
 
     def get_tags_list(self):  # TODO return tags list for list_display
         # return Ingredient.objects.get(self)
@@ -111,6 +106,14 @@ class Recipe(models.Model):
         return self.ingredients.all()#.values_list(flat=True)
         # return 0
 
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        # abstract = True
+        # ordering = ['-pub_date']
+        ordering = ['-name']
+
 
 class IngredientQuantity(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
@@ -119,3 +122,6 @@ class IngredientQuantity(models.Model):
         validators=[MaxValueValidator(5000)],
         verbose_name='Количество',
     )
+
+    def __str__(self):
+        return f'{self.ingredient}, {self.quantity}'  # TODO add units
