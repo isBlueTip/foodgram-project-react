@@ -15,7 +15,7 @@ class Tag(models.Model):
         max_length=20,
         verbose_name='Название тега',
     )
-    hex_color = models.CharField(
+    color = models.CharField(
         max_length=8,
         # validators=[(),],  # TODO write own HEX validator and delete hexfield from the project
         verbose_name='Цвет в HEX-кодировке',
@@ -34,7 +34,7 @@ class Ingredient(models.Model):
         max_length=100,
         verbose_name='Название ингредиента'
     )
-    units = models.CharField(
+    measurement_unit = models.CharField(
         max_length=12,
         verbose_name='Единица измерения',
     )
@@ -56,7 +56,7 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     name = models.CharField(
-        max_length=100,
+        max_length=200,
         verbose_name='Название блюда'
     )
     author = models.ForeignKey(
@@ -74,23 +74,29 @@ class Recipe(models.Model):
         through='IngredientQuantity',
         related_name='recipe',
         verbose_name='Список ингредиентов',
+        # blank=False,
     )
     cooking_time = models.PositiveIntegerField(
         validators=[MaxValueValidator(360)],
         verbose_name='Время приготовления'
     )
-    picture = models.ImageField(
+    picture = models.ImageField(  # string <binary> Картинка, закодированная в Base64
+        upload_to='recipes/',
         verbose_name='Фотография готового блюда',
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги рецепта'
     )
+    pub_date = models.DateTimeField(
+        'Дата и время добавления рецепта',
+        auto_now_add=True,
+    )
 
     def get_tags_list(self):  # TODO return tags list for list_display
         # return Ingredient.objects.get(self)
         # if isinstance(self.ingredients, int):
-        return self.tag.all().values_list('name')
+        return self.tags.all().values_list('name')
         # return 0
 
     # def get_ingredients_list(self):
@@ -111,8 +117,8 @@ class Recipe(models.Model):
 
     class Meta:
         # abstract = True
-        # ordering = ['-pub_date']
-        ordering = ['-name']
+        ordering = ['-pub_date']
+        # ordering = ['-name']
 
 
 class IngredientQuantity(models.Model):
