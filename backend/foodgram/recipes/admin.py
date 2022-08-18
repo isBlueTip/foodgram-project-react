@@ -6,13 +6,13 @@ from recipes.models import Ingredient, IngredientQuantity, Recipe, Tag
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('pk',
                     'name',
-                    'units',
+                    'measurement_unit',
                     )
     list_editable = ('name',
-                     'units',
+                     'measurement_unit',
                      )
     search_fields = ('name',)
-    list_filter = ('units',)
+    list_filter = ('measurement_unit',)
     empty_value_display = 'empty'
 
 
@@ -27,7 +27,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk',
                     'name',
                     'author',
-                    'picture',
+                    'image',
                     'text',
                     'get_ingredients_list',
                     'get_tags_list',
@@ -35,12 +35,12 @@ class RecipeAdmin(admin.ModelAdmin):
                     )
     list_editable = ('name',
                      'author',
-                     'picture',
+                     'image',
                      'text',
                      'cooking_time',
                      )
     search_fields = ('name',
-                     # 'author__name',  # TODO add lookup method for foreignkey fields
+                     # 'author__get_full_name()',  # TODO add lookup method for foreignkey fields
                      'text',
                      # 'ingredients',
                      'cooking_time',
@@ -54,15 +54,15 @@ class RecipeAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     list_display = ('pk',
                     'name',
-                    'hex_color',
+                    'color',
                     'slug',
                     )
     list_editable = ('name',
-                     'hex_color',
+                     'color',
                      'slug',
                      )
     search_fields = ('name',
-                     'hex_color',
+                     'color',
                      'slug',
                      )
     empty_value_display = 'empty'

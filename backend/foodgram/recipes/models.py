@@ -80,7 +80,7 @@ class Recipe(models.Model):
         validators=[MaxValueValidator(360)],
         verbose_name='Время приготовления'
     )
-    picture = models.ImageField(  # string <binary> Картинка, закодированная в Base64
+    image = models.ImageField(  # string <binary> Картинка, закодированная в Base64
         upload_to='recipes/',
         verbose_name='Фотография готового блюда',
     )
