@@ -1,8 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-USER = 'user'
 ADMIN = 'admin'
+USER = 'user'
 
 
 class User(AbstractUser):
@@ -32,7 +32,6 @@ class User(AbstractUser):
         choices=USER_ROLES,
         default=USER
     )
-    confirmation_code = models.CharField(max_length=8)
 
     class Meta:
         ordering = ['-id']

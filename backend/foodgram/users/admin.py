@@ -11,7 +11,6 @@ class UserAdmin(admin.ModelAdmin):
                     'last_name',
                     'is_staff',
                     'role',
-                    'confirmation_code',
                     )
     list_editable = ('username',
                      'email',
@@ -19,7 +18,6 @@ class UserAdmin(admin.ModelAdmin):
                      'last_name',
                      'is_staff',
                      'role',
-                     'confirmation_code',
                      )
     search_fields = ('username',
                      'email',
