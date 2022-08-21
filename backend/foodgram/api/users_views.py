@@ -1,17 +1,14 @@
 import logging
 
-# from django.shortcuts import get_object_or_404
-
-from rest_framework import viewsets  # , status
+from api.users_serializers import (CreateUserSerializer, PasswordSerializer,
+                                   UserSerializer)
+from loggers import formatter, logger
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-# from rest_framework.pagination import LimitOffsetPagination
-# from rest_framework.permissions import IsAuthenticated
-
-from loggers import logger, formatter
 # from .permissions import IsOwnerOrReadOnly
-from users.models import User
-from api.users_serializers import UserSerializer
-
+from users.models import ADMIN, USER, User
 
 LOG_NAME = 'users_views.log'
 
@@ -21,52 +18,41 @@ logger.addHandler(file_handler)
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Viewset to work with Recipe model."""
+    """Viewset to work with User model."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    # def list(self, request, *args, **kwargs):
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         logger.debug(f'serializer = {serializer}')
-    #         logger.debug(f'serializer.data = {serializer.data}')
-    #         return self.get_paginated_response(serializer.data)
-    #
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     logger.debug(f'serializer = {serializer}')
-    #     logger.debug(f'serializer.data = {serializer.data}')
-    #     return Response(serializer.data)
+    def create(self, request, *args, **kwargs):
+        serializer = CreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @action(detail=False,
+            methods=['get', ],
+            permission_classes=[IsAuthenticated, ],
+            url_path='me',
+            name='View current user details')
+    def view_user_info(self, request):
+        user = self.request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-# class TagViewSet(viewsets.ModelViewSet):
-#     """Viewset to work with Tag model."""
-#
-#     queryset = Tag.objects.all()
-#     serializer_class = TagSerializer
-#     pagination_class = None  # TODO why tags work only wo/ pagination?
-
-
-# class CommentViewSet(viewsets.ModelViewSet):
-#     """Viewset to work with Comment model."""
-#
-#     serializer_class = CommentSerializer
-#     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-#
-#     def get_queryset(self):
-#         post_id = self.kwargs.get('post_id')
-#         post = get_object_or_404(Post, pk=post_id)
-#         comments = post.comments
-#         return comments
-#
-#     def create(self, request, *args, **kwargs):
-#         serializer = CommentSerializer(
-#             data=request.data, context={'request': request})
-#         logger.debug(serializer)
-#         if serializer.is_valid():
-#             serializer.save(author=request.user)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=False,
+            methods=['post', ],
+            permission_classes=[IsAuthenticated, ],
+            serializer_class=PasswordSerializer,
+            url_path='set_password',
+            name='Change current user password')
+    def set_user_password(self, request):
+        user = self.request.user
+        serializer = self.get_serializer(data=self.request.data)
+        if serializer.is_valid(raise_exception=True):
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
