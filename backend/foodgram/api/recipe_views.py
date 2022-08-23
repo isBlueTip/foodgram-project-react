@@ -1,12 +1,12 @@
 import logging
 
-from api.recipes_serializers import RecipeSerializer, TagSerializer
+from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer
 from loggers import formatter, logger
 # from .permissions import IsOwnerOrReadOnly
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Tag, Ingredient
 from rest_framework import viewsets  # , status
 from rest_framework.response import Response
-from api.filters import RecipesFilter
+from api.filters import RecipeFilter
 
 # from django.shortcuts import get_object_or_404
 
@@ -27,7 +27,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    filterset_class = RecipesFilter
+    filterset_class = RecipeFilter
     # permission_classes = [AllowAny, ]
 
 
@@ -37,6 +37,15 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None  # TODO why front works only wo/ pagination?
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Viewset to work with Recipe model."""
+
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    # filterset_class = RecipeFilter
+    # permission_classes = [AllowAny, ]
 
 
 # class CommentViewSet(viewsets.ModelViewSet):
