@@ -1,19 +1,21 @@
 import logging
 
-# from django.shortcuts import get_object_or_404
-
-from rest_framework import viewsets  # , status
-# from rest_framework.response import Response
-# from rest_framework.pagination import LimitOffsetPagination
-# from rest_framework.permissions import IsAuthenticated
-
-from loggers import logger, formatter
+from api.recipes_serializers import RecipeSerializer, TagSerializer
+from loggers import formatter, logger
 # from .permissions import IsOwnerOrReadOnly
 from recipes.models import Recipe, Tag
-from api.recipes_serializers import RecipeSerializer, TagSerializer
+from rest_framework import viewsets  # , status
+from rest_framework.response import Response
+from api.filters import RecipesFilter
+
+# from django.shortcuts import get_object_or_404
+
+# from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
-LOG_NAME = 'api.views.log'
+
+LOG_NAME = 'recipes_views.log'
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
@@ -25,6 +27,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filterset_class = RecipesFilter
+    # permission_classes = [AllowAny, ]
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -32,7 +36,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = None  # TODO why tags work only wo/ pagination?
+    pagination_class = None  # TODO why front works only wo/ pagination?
 
 
 # class CommentViewSet(viewsets.ModelViewSet):

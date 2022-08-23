@@ -3,7 +3,7 @@
 from rest_framework import serializers
 
 # from .loggers import logger, formatter
-from recipes.models import Recipe, Tag
+from recipes.models import Recipe, Tag, Ingredient
 from users.models import User
 # from api.users_serializers import UserSerializer
 
@@ -13,6 +13,16 @@ from users.models import User
 # file_handler = logging.FileHandler(LOG_NAME)
 # file_handler.setFormatter(formatter)
 # logger.addHandler(file_handler)
+
+
+# class ImageField(serializers.ImageField):
+#
+#     def to_internal_value(self, data):
+#         print(data)
+#         file_object = super().to_internal_value(data)
+#         django_field = self._DjangoImageField()
+#         django_field.error_messages = self.error_messages
+#         return django_field.clean(file_object)
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -33,7 +43,17 @@ class TagSerializer(serializers.ModelSerializer):
                   'color',
                   'slug',
                   ]
-        # fields = '__all__'
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ingredient
+        fields = ['id',
+                  'name',
+                  'color',
+                  'slug',
+                  ]
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -46,12 +66,14 @@ class RecipeSerializer(serializers.ModelSerializer):
     # tags = serializers.StringRelatedField(source='tags.color',
     #                                       many=True)
     tags = TagSerializer(many=True)
+    ingredients = IngredientSerializer(many=True)
+    # image = serializers.ImageField()
 
     class Meta:
         model = Recipe
         fields = ['id',
                   'name',
-                  'author',  # TODO create user endpoints?
+                  'author',
                   'text',
                   'ingredients',
                   'cooking_time',
