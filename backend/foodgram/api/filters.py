@@ -9,11 +9,15 @@ class RecipeFilter(django_filters.FilterSet):
         to_field_name='slug',
         queryset=Tag.objects.all(),
     )
+    is_favorited = django_filters.NumberFilter()
+    is_in_shopping_cart = django_filters.NumberFilter()
 
     class Meta:
         model = Recipe
         fields = {
             'tags',
+            'is_favorited',
+            'is_in_shopping_cart',
         }
 
 
