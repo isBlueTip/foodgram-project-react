@@ -4,6 +4,7 @@ from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity
 from users.models import User
 
 from drf_extra_fields.fields import Base64ImageField
+from django.shortcuts import get_object_or_404
 
 import logging
 from loggers import logger, formatter
@@ -79,17 +80,18 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
 
+    tags = TagSerializer(
+        many=True
+    )
     author = AuthorSerializer(
         read_only=True,
         default=serializers.CurrentUserDefault()
-    )
-    tags = TagSerializer(
-        many=True
     )
     ingredients = IngredientQuantitySerializer(
         source='ingredientquantity_set',
         many=True,
     )
+    is_favorited = serializers.SerializerMethodField()
     image = Base64ImageField(required=True)
 
     class Meta:
@@ -106,6 +108,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         ]
+
+    def get_is_favorited(self, instance):
+        user = self.context.get('request').user
+        queryset = Recipe.objects.filter(is_favorited__email=user.email)
+        # logger.debug(Recipe.objects.filter(id=instance.id))
+        logger.debug(instance.id)
+
+        # logger.debug(data.__dict__)
+        # logger.debug(user.email)
 
     def to_internal_value(self, data):
         # logger.debug(f'raw_data = {data}')
@@ -175,3 +186,22 @@ class RecipeSerializer(serializers.ModelSerializer):
         self.create_ingredients(instance, ingredients)
         instance.save()
         return instance
+
+
+class RecipeFavoriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        ]
+
+        read_only_fields = [
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        ]
