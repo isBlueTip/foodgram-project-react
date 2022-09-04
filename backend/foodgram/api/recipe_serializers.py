@@ -3,8 +3,7 @@ from rest_framework import serializers
 from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity
 from users.models import User
 
-import base64
-from django.core.files.base import ContentFile
+from drf_extra_fields.fields import Base64ImageField
 
 import logging
 from loggers import logger, formatter
@@ -12,15 +11,6 @@ LOG_NAME = 'serializers.log'
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
-
-
-class Base64ImageField(serializers.ImageField):
-
-    def to_internal_value(self, data):
-        format, imgstr = data.split(';base64,')
-        ext = format.split('/')[-1]
-        data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return data
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -100,7 +90,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='ingredientquantity_set',
         many=True,
     )
-    image = Base64ImageField()
+    image = Base64ImageField(required=True)
 
     class Meta:
         model = Recipe
@@ -116,11 +106,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time',
         ]
-
-        # read_only_fields = [
-        #     'is_in_shopping_cart',
-        #     'is_favorited',
-        # ]
 
     def to_internal_value(self, data):
         # logger.debug(f'raw_data = {data}')
@@ -151,17 +136,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     #     logger.debug(value)
     #     return value
 
-    def create(self, validated_data):
-        # logger.debug(f'validated_data = {validated_data}')
-        author = self.context.get('request').user
-        raw_tags = validated_data.pop('tags')
-        tags = []
-        for tag in raw_tags:
-            tags.append(int(tag['id']))
-        logger.debug(f'tags = {tags}')
-        ingredients = validated_data.pop('ingredientquantity_set')
-        instance = Recipe.objects.create(author=author, **validated_data)
-        instance.tags.set(tags)
+    def create_ingredients(self, instance, ingredients):
         for recipe_ingredient in ingredients:
             ingredient = int(recipe_ingredient['ingredient']['id'])
             ingredient = Ingredient.objects.get(id=ingredient)
@@ -171,4 +146,32 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient,
                 quantity=quantity
             )
+
+    def create(self, validated_data):
+        # logger.debug(f'validated_data = {validated_data}')
+        author = self.context.get('request').user
+        raw_tags = validated_data.pop('tags')
+        tags = []
+        for tag in raw_tags:
+            tags.append(int(tag['id']))
+        ingredients = validated_data.pop('ingredientquantity_set')
+        instance = Recipe.objects.create(author=author, **validated_data)
+        instance.tags.set(tags)
+        self.create_ingredients(instance, ingredients)
+        return instance
+
+    def update(self, instance, validated_data):  # TODO IsAuthorOrReadOnly permission
+        logger.debug(f'validated_data = {validated_data}')
+        raw_tags = validated_data.pop('tags', None)
+        tags = []
+        for tag in raw_tags:
+            tags.append(int(tag['id']))
+        ingredients = validated_data.pop('ingredientquantity_set')
+
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.tags.set(tags)
+        IngredientQuantity.objects.filter(recipe=instance).delete()
+        self.create_ingredients(instance, ingredients)
+        instance.save()
         return instance
