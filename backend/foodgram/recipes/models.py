@@ -1,4 +1,3 @@
-# from djangoHexadecimal.fields import HexadecimalField  # TODO delete this package from the project
 from django.contrib.auth import get_user_model, admin
 from django.contrib import admin
 from django.core.validators import MaxValueValidator
@@ -86,17 +85,11 @@ class Recipe(models.Model):
         validators=[MaxValueValidator(360)],
         verbose_name='Время приготовления'
     )
-    image = models.ImageField(  # string <binary> Картинка, закодированная в Base64
+    image = models.ImageField(  #  TODO string <binary> Картинка, закодированная в Base64
         upload_to='recipes/',
         verbose_name='Фотография готового блюда',
         blank=True,
     )
-    # ********************
-    # format, imgstr = data.split(';base64,')
-    # ext = format.split('/')[-1]
-    #
-    # data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)  # You can save this as file instance.
-    # ********************
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги рецепта'
@@ -105,8 +98,6 @@ class Recipe(models.Model):
         'Дата и время добавления рецепта',
         auto_now_add=True,
     )
-
-    is_favorited = models.BooleanField(default=False)
 
     is_in_shopping_cart = models.BooleanField(default=False)
 
@@ -134,6 +125,25 @@ class Recipe(models.Model):
         # if isinstance(self.ingredients, int):
         return self.ingredients.all()#.values_list(flat=True)
         # return 0
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='user',
+        verbose_name='кто подписался',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='полюбившийся рецепт',
+    )
+
+    class Meta:
+        verbose_name = 'избранное'
+        verbose_name_plural = 'избранные'
 
 
 class IngredientQuantity(models.Model):
