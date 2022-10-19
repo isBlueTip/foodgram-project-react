@@ -3,11 +3,10 @@ import logging
 from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer, RecipeFavoriteSerializer
 from loggers import formatter, logger
 # from .permissions import IsOwnerOrReadOnly
-from recipes.models import Recipe, Tag, Ingredient
+from recipes.models import Recipe, Tag, Ingredient, Favorite
 from rest_framework import viewsets, status, mixins, generics
 from rest_framework.response import Response
 from api.filters import RecipeFilter, IngredientFilter
-from django.forms.models import model_to_dict
 
 from django.shortcuts import get_object_or_404
 
@@ -70,11 +69,15 @@ class RecipeFavoriteViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         recipe_id = kwargs['recipe_id']
-        instance = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-        instance.is_favorited.add(user)
-        serializer = self.get_serializer(instance=instance)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instance, created = Favorite.objects.get_or_create(
+            user=request.user,
+            recipe=recipe,
+        )
+        if created:
+            serializer = self.get_serializer(instance=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)  # TODO implement custom error message?
 
     def get_queryset(self):
         recipe_id = self.kwargs.get('recipe_id')
@@ -84,7 +87,8 @@ class RecipeFavoriteViewSet(mixins.CreateModelMixin,
 
     def delete(self, request, *args, **kwargs):
         recipe_id = kwargs.get('recipe_id')
-        instance = get_object_or_404(Recipe, id=recipe_id)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
         user = request.user
-        instance.is_favorited.remove(user)
+        instance = get_object_or_404(Favorite, user=user, recipe=recipe)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
