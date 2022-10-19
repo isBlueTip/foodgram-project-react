@@ -1,15 +1,14 @@
 import django_filters
 
-from recipes.models import Recipe, Tag, Ingredient
-
+from recipes.models import Recipe, Tag, Ingredient, Favorite
 
 
 import logging
-from loggers import logger, formatter
-LOG_NAME = 'serializers.log'
+from loggers import logger_filters, formatter
+LOG_NAME = 'logger_filters.log'
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logger_filters.addHandler(file_handler)
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -29,19 +28,16 @@ class RecipeFilter(django_filters.FilterSet):
     # is_in_shopping_cart = django_filters.NumberFilter()
 
     def filter_is_favorited(self, queryset, name, value):
-        logger.debug(f'queryset = {queryset}')
-        if int(value):
-            logger.debug(f'value = 1')
-            queryset = Recipe.objects.filter(is_favorited=self.user)
-        # lookup = '__'.join([name, 'isnull'])
-        # return queryset.filter(**{lookup: False})
+        logger_filters.debug(f'value = {value}')
+        if value == '0':
+            return queryset
+        queryset = queryset.filter(favorite__user=self.user)
         return queryset
 
     class Meta:
         model = Recipe
         fields = {
             'tags',
-            'is_favorited',
             # 'is_in_shopping_cart',
         }
 
