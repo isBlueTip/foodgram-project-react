@@ -1,17 +1,17 @@
 from rest_framework import serializers
 
-from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity
+from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity, Favorite
 from users.models import User
 
 from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
 
 import logging
-from loggers import logger, formatter
-LOG_NAME = 'serializers.log'
+from loggers import logger_serializers, formatter
+LOG_NAME = 'logger_serializers.log'
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logger_serializers.addHandler(file_handler)
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -102,7 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'author',
             'ingredients',
             'is_favorited',
-            'is_in_shopping_cart',
+            # 'is_in_shopping_cart',
             'name',
             'image',
             'text',
@@ -111,15 +111,16 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, instance):
         user = self.context.get('request').user
-        queryset = Recipe.objects.filter(is_favorited__email=user.email)
-        # logger.debug(Recipe.objects.filter(id=instance.id))
-        logger.debug(instance.id)
-
-        # logger.debug(data.__dict__)
-        # logger.debug(user.email)
+        logger_serializers.debug(instance)
+        logger_serializers.debug(user)
+        try:
+            Favorite.objects.get(user=user, recipe=instance)
+        except Favorite.DoesNotExist:
+            return False
+        return True
 
     def to_internal_value(self, data):
-        # logger.debug(f'raw_data = {data}')
+        logger_serializers.debug(f'raw_data = {data}')
         raw_tags = data.pop('tags')
         tags = []
         for tag in raw_tags:
@@ -172,7 +173,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):  # TODO IsAuthorOrReadOnly permission
-        logger.debug(f'validated_data = {validated_data}')
+        logger_serializers.debug(f'validated_data = {validated_data}')
         raw_tags = validated_data.pop('tags', None)
         tags = []
         for tag in raw_tags:
