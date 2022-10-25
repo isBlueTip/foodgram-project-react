@@ -1,14 +1,16 @@
-# import logging
+import logging
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-# from .loggers import logger, formatter
-from users.models import User
+from loggers import logger_users_serializers, formatter
+from users.models import User, Subscription
+from recipes.models import Recipe
+from api.recipe_serializers import RecipeFavoriteSerializer, RecipeSerializer
 
-# LOG_NAME = 'serializers.log'
-#
-# file_handler = logging.FileHandler(LOG_NAME)
-# file_handler.setFormatter(formatter)
-# logger.addHandler(file_handler)
+LOG_NAME = 'logger_users_serializers.log'
+
+file_handler = logging.FileHandler(LOG_NAME)
+file_handler.setFormatter(formatter)
+logger_users_serializers.addHandler(file_handler)
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -42,17 +44,26 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    # is_subscribed =  # TODO check subscription status if authorised
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = '__all__'
-        # fields = ['id',
-        #           'username',
-        #           'first_name',
-        #           'last_name',
-        #           # 'is_subscribed',
-        #           ]
+        # fields = '__all__'  # TODO why __all__?
+        fields = ['email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'is_subscribed',
+                  ]
+
+    def get_is_subscribed(self, instance):
+        user = self.context.get('request').user
+        try:
+            Subscription.objects.get(follower=user, author=instance)
+        except Subscription.DoesNotExist:
+            return False
+        return True
 
 
 class PasswordSerializer(serializers.ModelSerializer):
@@ -76,3 +87,44 @@ class PasswordSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         validate_password(value, user)
         return value
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = RecipeFavoriteSerializer(many=True, read_only=True, source='recipe')
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+        ]
+
+        read_only_fields = [
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+        ]
+
+    def get_is_subscribed(self, instance):
+        user = self.context.get('request').user
+        try:
+            Subscription.objects.get(follower=user, author=instance)
+        except Subscription.DoesNotExist:
+            return False
+        return True
+
+    def get_recipes_count(self, instance):
+        return len(Recipe.objects.filter(author=instance))
+

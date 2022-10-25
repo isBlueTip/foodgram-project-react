@@ -1,19 +1,21 @@
-from api.recipe_views import RecipeViewSet, TagViewSet, IngredientViewSet
-from api.users_views import UserViewSet
+from api.recipe_views import RecipeViewSet, TagViewSet, IngredientViewSet, RecipeFavoriteViewSet
+from api.users_views import UserViewSet, SubscriptionViewSet
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 
 router = SimpleRouter()
 
-router.register('recipes', RecipeViewSet, basename='recipe')
-router.register('tags', TagViewSet, basename='tag')
-router.register('users', UserViewSet, basename='user')
 router.register('ingredients', IngredientViewSet, basename='ingredient')
-# router.register(
-#     r'posts/(?P<post_id>\d+)/comments',
-#     CommentViewSet, basename='comment'
-# )
+router.register('recipes', RecipeViewSet, basename='recipe')
+router.register(
+    r'recipes/(?P<recipe_id>\d+)/favorite',
+    RecipeFavoriteViewSet, basename='recipefavorite')
+router.register('tags', TagViewSet, basename='tag')
+router.register(
+    r'users/(?P<user_id>\d+)/subscribe',
+    SubscriptionViewSet, basename='subscription')
+router.register('users', UserViewSet, basename='user')
 
 
 urlpatterns = [

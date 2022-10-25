@@ -1,20 +1,22 @@
 import logging
 
 from api.users_serializers import (CreateUserSerializer, PasswordSerializer,
-                                   UserSerializer)
-from loggers import formatter, logger
-from rest_framework import status, viewsets
+                                   UserSerializer, SubscriptionSerializer,)
+from api.recipe_serializers import RecipeSerializer
+from loggers import formatter, logger_users_views
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 # from .permissions import IsOwnerOrReadOnly
-from users.models import ADMIN, USER, User
+from users.models import ADMIN, USER, User, Subscription
+from django.shortcuts import get_object_or_404
 
-LOG_NAME = 'users_views.log'
+LOG_NAME = 'logger_users_views.log'
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logger_users_views.addHandler(file_handler)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -56,3 +58,53 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False,
+            methods=['get', ],
+            serializer_class=SubscriptionSerializer,)
+    def subscriptions(self, request, *args, **kwargs):
+        queryset = User.objects.filter(subscription__follower=request.user)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class SubscriptionViewSet(mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.ListModelMixin,
+                          viewsets.GenericViewSet,
+                          ):
+    serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        follower = self.request.user
+        users = User.objects.all()
+        following_authors = users.filter(subscription__follower=follower)
+        logger_users_views.debug(following_authors)
+        return following_authors
+
+    def create(self, request, *args, **kwargs):
+        author_id = kwargs.get('user_id')
+        author = get_object_or_404(User, id=author_id)
+        if author == request.user:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        instance, created = Subscription.objects.get_or_create(
+            follower=request.user, author=author)
+        if created:
+            serializer = self.get_serializer(instance=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        author_id = kwargs.get('user_id')
+        author = get_object_or_404(User, id=author_id)
+        instance = get_object_or_404(Subscription, follower=request.user, author=author)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
