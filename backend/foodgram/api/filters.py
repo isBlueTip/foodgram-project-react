@@ -1,6 +1,7 @@
 import django_filters
 
 from recipes.models import Recipe, Tag, Ingredient, Favorite
+from users.models import User
 
 
 import logging
@@ -25,8 +26,16 @@ class RecipeFilter(django_filters.FilterSet):
         field_name='is_favorited',
         method='filter_is_favorited',
     )
-    # is_in_shopping_cart = django_filters.NumberFilter()
-
+    author = django_filters.ModelChoiceFilter(
+        field_name='author_id',
+        to_field_name='id',
+        queryset=User.objects.all(),
+    )
+    # is_in_shopping_cart = django_filters.Filter(
+    #         field_name='is_in_shopping_cart',
+    #         method='filter_is_in_shopping_cart',
+    #     )
+    #
     def filter_is_favorited(self, queryset, name, value):
         if value == '0':
             return queryset
