@@ -1,12 +1,12 @@
+import logging
+
 import django_filters
 
-from recipes.models import Recipe, Tag, Ingredient, Favorite
+from loggers import formatter, logger_filters
+from recipes.models import Ingredient, Recipe, Tag
 from users.models import User
 
-
-import logging
-from loggers import logger_filters, formatter
-LOG_NAME = 'logger_filters.log'
+LOG_NAME = 'logs/logger_filters.log'
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
 logger_filters.addHandler(file_handler)
@@ -31,11 +31,7 @@ class RecipeFilter(django_filters.FilterSet):
         to_field_name='id',
         queryset=User.objects.all(),
     )
-    # is_in_shopping_cart = django_filters.Filter(
-    #         field_name='is_in_shopping_cart',
-    #         method='filter_is_in_shopping_cart',
-    #     )
-    #
+
     def filter_is_favorited(self, queryset, name, value):
         if value == '0':
             return queryset
@@ -46,7 +42,6 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = {
             'tags',
-            # 'is_in_shopping_cart',
         }
 
 
