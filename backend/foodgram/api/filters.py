@@ -28,7 +28,6 @@ class RecipeFilter(django_filters.FilterSet):
     # is_in_shopping_cart = django_filters.NumberFilter()
 
     def filter_is_favorited(self, queryset, name, value):
-        logger_filters.debug(f'value = {value}')
         if value == '0':
             return queryset
         queryset = queryset.filter(favorite__user=self.user)
