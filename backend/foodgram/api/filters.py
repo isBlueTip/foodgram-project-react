@@ -26,6 +26,10 @@ class RecipeFilter(django_filters.FilterSet):
         field_name='is_favorited',
         method='filter_is_favorited',
     )
+    is_in_shopping_cart = django_filters.Filter(
+        field_name='is_in_shopping_cart',
+        method='filter_is_in_shopping_cart',
+    )
     author = django_filters.ModelChoiceFilter(
         field_name='author_id',
         to_field_name='id',
@@ -33,9 +37,19 @@ class RecipeFilter(django_filters.FilterSet):
     )
 
     def filter_is_favorited(self, queryset, name, value):
+        if self.user.is_anonymous:
+            return queryset
         if value == '0':
             return queryset
         queryset = queryset.filter(favorite__user=self.user)
+        return queryset
+
+    def filter_is_in_shopping_cart(self, queryset, name, value):
+        if self.user.is_anonymous:
+            return queryset
+        if value == '0':
+            return queryset
+        queryset = queryset.filter(cart__user=self.user)
         return queryset
 
     class Meta:
