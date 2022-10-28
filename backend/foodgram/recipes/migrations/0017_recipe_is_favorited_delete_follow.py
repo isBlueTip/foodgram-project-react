@@ -8,16 +8,20 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('recipes', '0016_remove_recipe_is_favorited_follow'),
+        ("recipes", "0016_remove_recipe_is_favorited_follow"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='recipe',
-            name='is_favorited',
-            field=models.ManyToManyField(related_name='is_favorited', to=settings.AUTH_USER_MODEL, verbose_name='Подписавшеся пользователи'),
+            model_name="recipe",
+            name="is_favorited",
+            field=models.ManyToManyField(
+                related_name="is_favorited",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Подписавшеся пользователи",
+            ),
         ),
         migrations.DeleteModel(
-            name='Follow',
+            name="Follow",
         ),
     ]

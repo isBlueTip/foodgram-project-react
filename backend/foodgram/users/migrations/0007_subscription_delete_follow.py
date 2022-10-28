@@ -8,23 +8,47 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0006_remove_user_confirmation_code'),
+        ("users", "0006_remove_user_confirmation_code"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Subscription',
+            name="Subscription",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subscription', to=settings.AUTH_USER_MODEL, verbose_name='на кого подписка')),
-                ('follower', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follower', to=settings.AUTH_USER_MODEL, verbose_name='кто подписался')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subscription",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="на кого подписка",
+                    ),
+                ),
+                (
+                    "follower",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="follower",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="кто подписался",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'избранное',
-                'verbose_name_plural': 'избранные',
+                "verbose_name": "избранное",
+                "verbose_name_plural": "избранные",
             },
         ),
         migrations.DeleteModel(
-            name='Follow',
+            name="Follow",
         ),
     ]

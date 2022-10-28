@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0013_recipe_is_favorited_recipe_is_in_shopping_cart'),
+        ("recipes", "0013_recipe_is_favorited_recipe_is_in_shopping_cart"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ingredient',
-            name='measurement_unit',
-            field=models.CharField(max_length=200, verbose_name='Единица измерения'),
+            model_name="ingredient",
+            name="measurement_unit",
+            field=models.CharField(max_length=200, verbose_name="Единица измерения"),
         ),
         migrations.AlterField(
-            model_name='ingredient',
-            name='name',
-            field=models.CharField(max_length=200, verbose_name='Название ингредиента'),
+            model_name="ingredient",
+            name="name",
+            field=models.CharField(max_length=200, verbose_name="Название ингредиента"),
         ),
     ]

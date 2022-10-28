@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0008_rename_units_ingredient_measurement_unit_and_more'),
+        ("recipes", "0008_rename_units_ingredient_measurement_unit_and_more"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='recipe',
-            options={'ordering': ['-pub_date']},
+            name="recipe",
+            options={"ordering": ["-pub_date"]},
         ),
     ]

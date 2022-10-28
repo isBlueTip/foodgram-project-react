@@ -3,11 +3,6 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 
-# import base64
-# from django.core.files.base import ContentFile
-
-
-# import csv  # TODO delete for csv import
 
 User = get_user_model()
 
@@ -47,17 +42,6 @@ class Ingredient(models.Model):
         return self.name
 
 
-#  TODO delete this import
-# with open('/home/bluetip/dev/foodgram-project-react/data/ingredients.csv') as f:
-#     reader = csv.reader(f)
-#     for i, row in enumerate(reader):
-#         _, created = Ingredient.objects.get_or_create(
-#             id=i + 1,
-#             name=row[0],
-#             units=row[1],
-#         )
-
-
 class Recipe(models.Model):
     name = models.CharField(max_length=200, verbose_name="Название блюда")
     author = models.ForeignKey(
@@ -71,7 +55,7 @@ class Recipe(models.Model):
         verbose_name="Рецепт",
     )
     ingredients = models.ManyToManyField(
-        Ingredient,  # TODO UniqueConstraint?
+        Ingredient,
         through="IngredientQuantity",
         related_name="recipe",
         verbose_name="Список ингредиентов",
@@ -80,12 +64,10 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         validators=[MaxValueValidator(360)], verbose_name="Время приготовления"
     )
-    image = (
-        models.ImageField(  #  TODO string <binary> Картинка, закодированная в Base64
-            upload_to="recipes/",
-            verbose_name="Фотография готового блюда",
-            blank=True,
-        )
+    image = models.ImageField(
+        upload_to="recipes/",
+        verbose_name="Фотография готового блюда",
+        blank=True,
     )
     tags = models.ManyToManyField(Tag, verbose_name="Теги рецепта")
     pub_date = models.DateTimeField(
@@ -101,18 +83,12 @@ class Recipe(models.Model):
     def __str__(self):
         return self.name
 
-    def get_tags_list(self):  # TODO return tags list for list_display
-        # return Ingredient.objects.get(self)
-        # if isinstance(self.ingredients, int):
+    def get_tags_list(self):
         return self.tags.all().values_list("name")
-        # return 0
 
     @admin.display(empty_value="unknown")
     def get_ingredients_list(self):
-        # return Ingredient.objects.get(self)
-        # if isinstance(self.ingredients, int):
-        return self.ingredients.all()  # .values_list(flat=True)
-        # return 0
+        return self.ingredients.all()
 
 
 class Favorite(models.Model):
@@ -144,7 +120,7 @@ class IngredientQuantity(models.Model):
     )
 
     def __str__(self):
-        return f"{self.ingredient}, {self.quantity}"  # TODO add units
+        return f"{self.ingredient}, {self.quantity}"
 
 
 class Cart(models.Model):

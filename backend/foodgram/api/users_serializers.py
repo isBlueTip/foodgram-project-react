@@ -1,13 +1,13 @@
 import logging
 
-from api.recipe_serializers import CartFavoriteSerializer, RecipeSerializer
+from api.recipe_serializers import CartFavoriteSerializer
 from django.contrib.auth.password_validation import validate_password
 from loggers import formatter, logger_users_serializers
 from recipes.models import Recipe
 from rest_framework import serializers
 from users.models import Subscription, User
 
-LOG_NAME = "logger_users_serializers.log"
+LOG_NAME = "logs/logger_users_serializers.log"
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)

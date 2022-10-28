@@ -6,17 +6,21 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0011_alter_tag_slug'),
+        ("recipes", "0011_alter_tag_slug"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='ingredient',
-            options={'ordering': ['-pk']},
+            name="ingredient",
+            options={"ordering": ["-pk"]},
         ),
         migrations.AlterField(
-            model_name='recipe',
-            name='image',
-            field=models.ImageField(blank=True, upload_to='recipes/', verbose_name='Фотография готового блюда'),
+            model_name="recipe",
+            name="image",
+            field=models.ImageField(
+                blank=True,
+                upload_to="recipes/",
+                verbose_name="Фотография готового блюда",
+            ),
         ),
     ]

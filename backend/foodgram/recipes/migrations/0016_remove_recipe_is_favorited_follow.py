@@ -9,24 +9,47 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('recipes', '0015_remove_recipe_is_favorited_recipe_is_favorited'),
+        ("recipes", "0015_remove_recipe_is_favorited_recipe_is_favorited"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='recipe',
-            name='is_favorited',
+            model_name="recipe",
+            name="is_favorited",
         ),
         migrations.CreateModel(
-            name='Follow',
+            name="Follow",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('recipe', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='following', to='recipes.recipe', verbose_name='полюбившийся рецепт')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='кто подписался')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "recipe",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="following",
+                        to="recipes.recipe",
+                        verbose_name="полюбившийся рецепт",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="кто подписался",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'подписка',
-                'verbose_name_plural': 'подписки',
+                "verbose_name": "подписка",
+                "verbose_name_plural": "подписки",
             },
         ),
     ]

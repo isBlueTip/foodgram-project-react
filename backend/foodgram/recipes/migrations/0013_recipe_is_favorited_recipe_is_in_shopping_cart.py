@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0012_alter_ingredient_options_alter_recipe_image'),
+        ("recipes", "0012_alter_ingredient_options_alter_recipe_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='recipe',
-            name='is_favorited',
+            model_name="recipe",
+            name="is_favorited",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='is_in_shopping_cart',
+            model_name="recipe",
+            name="is_in_shopping_cart",
             field=models.BooleanField(default=False),
         ),
     ]

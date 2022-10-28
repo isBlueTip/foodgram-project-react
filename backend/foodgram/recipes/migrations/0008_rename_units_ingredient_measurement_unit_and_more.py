@@ -7,24 +7,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0007_rename_hex_color_tag_color'),
+        ("recipes", "0007_rename_hex_color_tag_color"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='ingredient',
-            old_name='units',
-            new_name='measurement_unit',
+            model_name="ingredient",
+            old_name="units",
+            new_name="measurement_unit",
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='pub_date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now, verbose_name='Дата и время добавления рецепта'),
+            model_name="recipe",
+            name="pub_date",
+            field=models.DateTimeField(
+                auto_now_add=True,
+                default=django.utils.timezone.now,
+                verbose_name="Дата и время добавления рецепта",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='recipe',
-            name='name',
-            field=models.CharField(max_length=200, verbose_name='Название блюда'),
+            model_name="recipe",
+            name="name",
+            field=models.CharField(max_length=200, verbose_name="Название блюда"),
         ),
     ]

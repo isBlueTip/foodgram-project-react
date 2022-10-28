@@ -6,7 +6,7 @@ from recipes.models import Cart, Favorite, Ingredient, IngredientQuantity, Recip
 from rest_framework import serializers
 from users.models import Subscription, User
 
-LOG_NAME = "logger_recipe_serializers.log"
+LOG_NAME = "logs/logger_recipe_serializers.log"
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
 logger_recipe_serializers.addHandler(file_handler)
@@ -146,17 +146,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         return res
 
     def validate_ingredients(self, value):
-        # logger.debug(value)
         for recipe_ingredient in value:
             ingredient = int(recipe_ingredient["ingredient"]["id"])
             try:
-                ingredient = Ingredient.objects.get(
-                    id=ingredient
-                )  # TODO KISS! I make a whole db request only just to validate and repeat this action in def create()!
+                ingredient = Ingredient.objects.get(id=ingredient)
             except Exception as e:
                 msg = f"ингредиента с номером {ingredient} нет в списке"
                 raise serializers.ValidationError(msg)
-        return value  # TODO return cleaned data with instances instead of IDs?
+        return value
 
     def create_ingredients(self, instance, ingredients):
         for recipe_ingredient in ingredients:
@@ -179,7 +176,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         self.create_ingredients(instance, ingredients)
         return instance
 
-    def update(self, instance, validated_data):  # TODO IsAuthorOrReadOnly permission
+    def update(self, instance, validated_data):
         raw_tags = validated_data.pop("tags", None)
         tags = []
         for tag in raw_tags:

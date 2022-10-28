@@ -1,7 +1,6 @@
 import logging
 
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
-from api.recipe_serializers import RecipeSerializer
 from api.users_serializers import (
     CreateUserSerializer,
     PasswordSerializer,
@@ -12,15 +11,12 @@ from django.shortcuts import get_object_or_404
 from loggers import formatter, logger_users_views
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
-from rest_framework.response import Response
-from users.models import ADMIN, USER, Subscription, User
+from rest_framework.permissions import IsAuthenticated
 
-LOG_NAME = "logger_users_views.log"
+from rest_framework.response import Response
+from users.models import Subscription, User
+
+LOG_NAME = "logs/logger_users_views.log"
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)

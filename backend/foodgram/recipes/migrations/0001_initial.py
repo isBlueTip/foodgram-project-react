@@ -8,42 +8,104 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Ingredient',
+            name="Ingredient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Название ингредиента')),
-                ('units', models.CharField(max_length=12, verbose_name='Единица измерения')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=100, verbose_name="Название ингредиента"
+                    ),
+                ),
+                (
+                    "units",
+                    models.CharField(max_length=12, verbose_name="Единица измерения"),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='IngredientQuantity',
+            name="IngredientQuantity",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField(validators=[django.core.validators.MaxValueValidator(5000)], verbose_name='Количество')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "quantity",
+                    models.PositiveIntegerField(
+                        validators=[django.core.validators.MaxValueValidator(5000)],
+                        verbose_name="Количество",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Recipe',
+            name="Recipe",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Название блюда')),
-                ('text', models.TextField(max_length=3000, verbose_name='Рецепт')),
-                ('cooking_time', models.PositiveIntegerField(validators=[django.core.validators.MaxValueValidator(360)], verbose_name='Время приготовления')),
-                ('picture', models.ImageField(upload_to='', verbose_name='Фотография готового блюда')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=100, verbose_name="Название блюда"),
+                ),
+                ("text", models.TextField(max_length=3000, verbose_name="Рецепт")),
+                (
+                    "cooking_time",
+                    models.PositiveIntegerField(
+                        validators=[django.core.validators.MaxValueValidator(360)],
+                        verbose_name="Время приготовления",
+                    ),
+                ),
+                (
+                    "picture",
+                    models.ImageField(
+                        upload_to="", verbose_name="Фотография готового блюда"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Tag',
+            name="Tag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20, verbose_name='Название тега')),
-                ('hex_color', models.CharField(max_length=8, verbose_name='Цвет в HEX-кодировке')),
-                ('slug', models.CharField(max_length=32, verbose_name='Slug-адрес')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20, verbose_name="Название тега")),
+                (
+                    "hex_color",
+                    models.CharField(max_length=8, verbose_name="Цвет в HEX-кодировке"),
+                ),
+                ("slug", models.CharField(max_length=32, verbose_name="Slug-адрес")),
             ],
         ),
     ]
