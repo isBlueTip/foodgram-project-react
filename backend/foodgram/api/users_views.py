@@ -80,6 +80,8 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
                           viewsets.GenericViewSet,
                           ):
+    """Viewset to work with Subscription model."""
+
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
 

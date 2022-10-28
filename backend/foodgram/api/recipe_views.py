@@ -1,17 +1,19 @@
 import logging
 
+from rest_framework.decorators import action
+
 from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer, CartFavoriteSerializer
 from loggers import formatter, logger_recipe_views
-# from .permissions import IsOwnerOrReadOnly
-from recipes.models import Recipe, Tag, Ingredient, Favorite, Cart
-from rest_framework import viewsets, status, mixins, generics
+from recipes.models import Recipe, Tag, Ingredient, Favorite, Cart, IngredientQuantity
+from rest_framework import viewsets, status, mixins
 from rest_framework.response import Response
 from api.filters import RecipeFilter, IngredientFilter
 
+from django.http import HttpResponse
+
 from django.shortcuts import get_object_or_404
 
-# from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 
@@ -31,6 +33,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
     permission_classes = [IsAdminOrIsAuthorOrReadOnly, ]
 
+    @action(detail=False,
+            methods=['get', ],
+            permission_classes=[AllowAny, ],
+            url_path='download_shopping_cart',)
+    def cart(self, request):
+        cart = Recipe.objects.filter(cart__user=request.user)
+        ingredients = {}
+        for recipe in cart:
+            ingredient_quantities = IngredientQuantity.objects.filter(recipe=recipe)
+            for ingredient in ingredient_quantities.iterator():
+                name = ingredient.ingredient.name
+                qty = ingredient.quantity
+                units = ingredient.ingredient.measurement_unit
+                if name in ingredients.keys():
+                    ingredients[name][0] += qty
+                else:
+                    ingredients[name] = [qty, units]
+
+        response = HttpResponse(content_type='text/plain; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        for index, ingredient in enumerate(ingredients):
+            response.write(f'{index + 1}. {ingredient}: {ingredients[ingredient][0]} {ingredients[ingredient][1]}\n')
+        response.write('Приятного аппетита!')
+        return response
+
 
 class TagViewSet(viewsets.ModelViewSet):
     """Viewset to work with Tag model."""
@@ -38,10 +65,11 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+    permission_classes = [AllowAny, ]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Viewset to work with Recipe model."""
+    """Viewset to work with Ingredient model."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -53,6 +81,7 @@ class FavoriteViewSet(mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet,
                       ):
+    """Viewset to work with Favorite model."""
 
     serializer_class = CartFavoriteSerializer
     permission_classes = [IsAuthenticated, ]
@@ -80,6 +109,7 @@ class CartViewSet(mixins.CreateModelMixin,
                   mixins.DestroyModelMixin,
                   viewsets.GenericViewSet,
                   ):
+    """Viewset to work with Cart model."""
 
     serializer_class = CartFavoriteSerializer
     permission_classes = [IsAuthenticated, ]
