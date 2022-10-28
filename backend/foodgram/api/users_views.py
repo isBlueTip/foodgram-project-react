@@ -1,19 +1,26 @@
 import logging
 
-from api.users_serializers import (CreateUserSerializer, PasswordSerializer,
-                                   UserSerializer, SubscriptionSerializer,)
-from api.recipe_serializers import RecipeSerializer
-from loggers import formatter, logger_users_views
-from rest_framework import status, viewsets, mixins
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
-from users.models import ADMIN, USER, User, Subscription
-from django.shortcuts import get_object_or_404
-
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
+from api.recipe_serializers import RecipeSerializer
+from api.users_serializers import (
+    CreateUserSerializer,
+    PasswordSerializer,
+    SubscriptionSerializer,
+    UserSerializer,
+)
+from django.shortcuts import get_object_or_404
+from loggers import formatter, logger_users_views
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
+from rest_framework.response import Response
+from users.models import ADMIN, USER, Subscription, User
 
-LOG_NAME = 'logger_users_views.log'
+LOG_NAME = "logger_users_views.log"
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
@@ -32,38 +39,55 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
-    @action(detail=False,
-            methods=['get', ],
-            permission_classes=[IsAuthenticated, ],
-            url_path='me',
-            name='View current user details')
+    @action(
+        detail=False,
+        methods=[
+            "get",
+        ],
+        permission_classes=[
+            IsAuthenticated,
+        ],
+        url_path="me",
+        name="View current user details",
+    )
     def view_user_info(self, request):
         user = self.request.user
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False,
-            methods=['post', ],
-            permission_classes=[IsAuthenticated, ],
-            serializer_class=PasswordSerializer,
-            url_path='set_password',
-            name='Change current user password')
+    @action(
+        detail=False,
+        methods=[
+            "post",
+        ],
+        permission_classes=[
+            IsAuthenticated,
+        ],
+        serializer_class=PasswordSerializer,
+        url_path="set_password",
+        name="Change current user password",
+    )
     def set_user_password(self, request):
         user = self.request.user
         serializer = self.get_serializer(data=self.request.data)
         if serializer.is_valid(raise_exception=True):
-            user.set_password(serializer.validated_data['new_password'])
+            user.set_password(serializer.validated_data["new_password"])
             user.save()
             return Response(status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False,
-            methods=['get', ],
-            serializer_class=SubscriptionSerializer,)
+    @action(
+        detail=False,
+        methods=[
+            "get",
+        ],
+        serializer_class=SubscriptionSerializer,
+    )
     def subscriptions(self, request, *args, **kwargs):
         queryset = User.objects.filter(subscription__follower=request.user)
 
@@ -76,10 +100,11 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class SubscriptionViewSet(mixins.CreateModelMixin,
-                          mixins.DestroyModelMixin,
-                          viewsets.GenericViewSet,
-                          ):
+class SubscriptionViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """Viewset to work with Subscription model."""
 
     serializer_class = SubscriptionSerializer
@@ -94,19 +119,20 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         logger_users_views.debug(request)
-        author_id = kwargs.get('user_id')
+        author_id = kwargs.get("user_id")
         author = get_object_or_404(User, id=author_id)
         if author == request.user:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         instance, created = Subscription.objects.get_or_create(
-            follower=request.user, author=author)
+            follower=request.user, author=author
+        )
         if created:
             serializer = self.get_serializer(instance=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
-        author_id = kwargs.get('user_id')
+        author_id = kwargs.get("user_id")
         author = get_object_or_404(User, id=author_id)
         instance = get_object_or_404(Subscription, follower=request.user, author=author)
         instance.delete()

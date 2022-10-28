@@ -1,40 +1,37 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-ADMIN = 'admin'
-USER = 'user'
+ADMIN = "admin"
+USER = "user"
 
 
 class User(AbstractUser):
     USER_ROLES = [
-        (USER, 'User'),
-        (ADMIN, 'Admin'),
+        (USER, "User"),
+        (ADMIN, "Admin"),
     ]
     first_name = models.CharField(
-        'first name',
+        "first name",
         max_length=150,
         blank=False,
     )
     last_name = models.CharField(
-        'last name',
+        "last name",
         max_length=150,
         blank=False,
     )
     email = models.EmailField(
-        'email address',
+        "email address",
         unique=True,
         blank=False,
         null=False,
     )
     role = models.CharField(
-        'роль на сайте',
-        max_length=32,
-        choices=USER_ROLES,
-        default=USER
+        "роль на сайте", max_length=32, choices=USER_ROLES, default=USER
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ["-id"]
         # verbose_name = 'пользователь'
         # verbose_name_plural = 'пользователи'
 
@@ -48,16 +45,16 @@ class Subscription(models.Model):
     follower = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='кто подписался',
+        related_name="follower",
+        verbose_name="кто подписался",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscription',
-        verbose_name='на кого подписка',
+        related_name="subscription",
+        verbose_name="на кого подписка",
     )
 
     class Meta:
-        verbose_name = 'избранное'
-        verbose_name_plural = 'избранные'
+        verbose_name = "избранное"
+        verbose_name_plural = "избранные"
