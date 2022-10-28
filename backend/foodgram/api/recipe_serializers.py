@@ -1,10 +1,9 @@
 from rest_framework import serializers
 
-from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity, Favorite
+from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity, Favorite, Cart
 from users.models import User, Subscription
 
 from drf_extra_fields.fields import Base64ImageField
-from django.shortcuts import get_object_or_404
 
 import logging
 from loggers import logger_recipe_serializers, formatter
@@ -103,6 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True,
     )
     is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(required=True)
 
     class Meta:
@@ -113,7 +113,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'author',
             'ingredients',
             'is_favorited',
-            # 'is_in_shopping_cart',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
@@ -127,6 +127,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         try:
             Favorite.objects.get(user=user, recipe=instance)
         except Favorite.DoesNotExist:
+            return False
+        return True
+
+    def get_is_in_shopping_cart(self, instance):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        try:
+            Cart.objects.get(user=user, recipe=instance)
+        except Cart.DoesNotExist:
             return False
         return True
 
@@ -151,9 +161,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(msg)
         return value  # TODO return cleaned data with instances instead of IDs?
 
-    # def validate_tags(self, value):
-    #     logger.debug(value)
-    #     return value
 
     def create_ingredients(self, instance, ingredients):
         for recipe_ingredient in ingredients:
