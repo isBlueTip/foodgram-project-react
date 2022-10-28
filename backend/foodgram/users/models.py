@@ -44,7 +44,7 @@ class User(AbstractUser):
         return self.username
 
 
-class Follow(models.Model):
+class Subscription(models.Model):
     follower = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -54,6 +54,10 @@ class Follow(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
+        related_name='subscription',
         verbose_name='на кого подписка',
     )
+
+    class Meta:
+        verbose_name = 'избранное'
+        verbose_name_plural = 'избранные'
