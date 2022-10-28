@@ -167,7 +167,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
 
     def create(self, validated_data):
-        # logger.debug(f'validated_data = {validated_data}')
         author = self.context.get('request').user
         raw_tags = validated_data.pop('tags')
         tags = []
@@ -180,7 +179,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):  # TODO IsAuthorOrReadOnly permission
-        # logger_recipe_serializers.debug(f'validated_data = {validated_data}')
         raw_tags = validated_data.pop('tags', None)
         tags = []
         for tag in raw_tags:
@@ -196,7 +194,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
 
-class RecipeFavoriteSerializer(serializers.ModelSerializer):
+class CartFavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe

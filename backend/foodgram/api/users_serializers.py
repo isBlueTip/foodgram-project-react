@@ -4,7 +4,7 @@ from rest_framework import serializers
 from loggers import logger_users_serializers, formatter
 from users.models import User, Subscription
 from recipes.models import Recipe
-from api.recipe_serializers import RecipeFavoriteSerializer, RecipeSerializer
+from api.recipe_serializers import CartFavoriteSerializer, RecipeSerializer
 
 LOG_NAME = 'logger_users_serializers.log'
 
@@ -91,7 +91,7 @@ class PasswordSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    recipes = RecipeFavoriteSerializer(many=True, read_only=True, source='recipe')
+    recipes = CartFavoriteSerializer(many=True, read_only=True, source='recipe')
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:

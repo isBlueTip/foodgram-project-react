@@ -1,9 +1,9 @@
 import logging
 
-from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer, RecipeFavoriteSerializer
+from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer, CartFavoriteSerializer
 from loggers import formatter, logger_recipe_views
 # from .permissions import IsOwnerOrReadOnly
-from recipes.models import Recipe, Tag, Ingredient, Favorite
+from recipes.models import Recipe, Tag, Ingredient, Favorite, Cart
 from rest_framework import viewsets, status, mixins, generics
 from rest_framework.response import Response
 from api.filters import RecipeFilter, IngredientFilter
@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, I
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 
 
-LOG_NAME = 'logger_recipe_views.log'
+LOG_NAME = 'logs/logger_recipe_views.log'
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
@@ -30,16 +30,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     filterset_class = RecipeFilter
     permission_classes = [IsAdminOrIsAuthorOrReadOnly, ]
-
-    # def create(self, request, *args, **kwargs):
-    #     data = request.data
-    #     # logger.debug(data)
-    #     serializer = CreateRecipeSerializer(data=data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    #     # return Response(status=status.HTTP_201_CREATED)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -57,16 +47,15 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filterset_class = IngredientFilter
     pagination_class = None
-    # permission_classes = [AllowAny, ]
 
 
-class RecipeFavoriteViewSet(mixins.CreateModelMixin,
-                            mixins.DestroyModelMixin,
-                            viewsets.GenericViewSet,
-                            ):
+class FavoriteViewSet(mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet,
+                      ):
 
-    serializer_class = RecipeFavoriteSerializer
-    permission_classes = [IsAuthenticated]
+    serializer_class = CartFavoriteSerializer
+    permission_classes = [IsAuthenticated, ]
 
     def create(self, request, *args, **kwargs):
         recipe_id = kwargs['recipe_id']
@@ -76,18 +65,39 @@ class RecipeFavoriteViewSet(mixins.CreateModelMixin,
         if created:
             serializer = self.get_serializer(instance=recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)  # TODO implement custom error message?
-
-    # def get_queryset(self):
-    #     recipe_id = self.kwargs.get('recipe_id')
-    #     recipe = get_object_or_404(Recipe, pk=recipe_id)
-    #     favorite_recipes = recipe.is_favorited
-    #     return favorite_recipes
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         recipe_id = kwargs.get('recipe_id')
         recipe = get_object_or_404(Recipe, id=recipe_id)
         user = request.user
         instance = get_object_or_404(Favorite, user=user, recipe=recipe)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CartViewSet(mixins.CreateModelMixin,
+                  mixins.DestroyModelMixin,
+                  viewsets.GenericViewSet,
+                  ):
+
+    serializer_class = CartFavoriteSerializer
+    permission_classes = [IsAuthenticated, ]
+
+    def create(self, request, *args, **kwargs):
+        recipe_id = kwargs['recipe_id']
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instance, created = Cart.objects.get_or_create(
+            user=request.user, recipe=recipe,)
+        if created:
+            serializer = self.get_serializer(instance=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        recipe_id = kwargs.get('recipe_id')
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        user = request.user
+        instance = get_object_or_404(Cart, user=user, recipe=recipe)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
