@@ -1,20 +1,21 @@
 from rest_framework import serializers
 
 from recipes.models import Recipe, Tag, Ingredient, IngredientQuantity, Favorite
-from users.models import User
+from users.models import User, Subscription
 
 from drf_extra_fields.fields import Base64ImageField
 from django.shortcuts import get_object_or_404
 
 import logging
-from loggers import logger_serializers, formatter
-LOG_NAME = 'logger_serializers.log'
+from loggers import logger_recipe_serializers, formatter
+LOG_NAME = 'logger_recipe_serializers.log'
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
-logger_serializers.addHandler(file_handler)
+logger_recipe_serializers.addHandler(file_handler)
 
 
 class AuthorSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -24,8 +25,18 @@ class AuthorSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
-            # 'is_subscribed',
+            'is_subscribed',
         ]
+
+    def get_is_subscribed(self, instance):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        try:
+            Subscription.objects.get(follower=user, author=instance)
+        except Subscription.DoesNotExist:
+            return False
+        return True
 
 
 class IngredientQuantitySerializer(serializers.ModelSerializer):
@@ -111,8 +122,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, instance):
         user = self.context.get('request').user
-        logger_serializers.debug(instance)
-        logger_serializers.debug(user)
+        if user.is_anonymous:
+            return False
         try:
             Favorite.objects.get(user=user, recipe=instance)
         except Favorite.DoesNotExist:
@@ -120,17 +131,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         return True
 
     def to_internal_value(self, data):
-        logger_serializers.debug(f'raw_data = {data}')
-        raw_tags = data.pop('tags')
+        raw_tags = data.get('tags')
         tags = []
-        for tag in raw_tags:
-            tags.append({'id': tag})
-        # logger.debug(f'tags = {tags}')
+        if raw_tags:
+            for tag in raw_tags:
+                tags.append({'id': tag})
         data['tags'] = tags
-        # logger.debug(f'data = {data}')
         res = super(RecipeSerializer, self).to_internal_value(data)
-        # res.tags = tags
-        # logger.debug(f'new_res = {res}')
         return res
 
     def validate_ingredients(self, value):
@@ -173,7 +180,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):  # TODO IsAuthorOrReadOnly permission
-        logger_serializers.debug(f'validated_data = {validated_data}')
+        # logger_recipe_serializers.debug(f'validated_data = {validated_data}')
         raw_tags = validated_data.pop('tags', None)
         tags = []
         for tag in raw_tags:

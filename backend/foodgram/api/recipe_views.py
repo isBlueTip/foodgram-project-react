@@ -1,7 +1,7 @@
 import logging
 
 from api.recipe_serializers import RecipeSerializer, TagSerializer, IngredientSerializer, RecipeFavoriteSerializer
-from loggers import formatter, logger
+from loggers import formatter, logger_recipe_views
 # from .permissions import IsOwnerOrReadOnly
 from recipes.models import Recipe, Tag, Ingredient, Favorite
 from rest_framework import viewsets, status, mixins, generics
@@ -11,15 +11,16 @@ from api.filters import RecipeFilter, IngredientFilter
 from django.shortcuts import get_object_or_404
 
 # from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser#, IsOwnerOrReadOnly
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, IsAuthenticatedOrReadOnly
+
+from api.permissions import IsAdminOrIsAuthorOrReadOnly
 
 
-
-LOG_NAME = 'recipes_views.log'
+LOG_NAME = 'logger_recipe_views.log'
 
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+logger_recipe_views.addHandler(file_handler)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -28,7 +29,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filterset_class = RecipeFilter
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [IsAdminOrIsAuthorOrReadOnly, ]
 
     # def create(self, request, *args, **kwargs):
     #     data = request.data
@@ -46,7 +47,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = None  # TODO why front works only wo/ pagination?
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -71,19 +72,17 @@ class RecipeFavoriteViewSet(mixins.CreateModelMixin,
         recipe_id = kwargs['recipe_id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
         instance, created = Favorite.objects.get_or_create(
-            user=request.user,
-            recipe=recipe,
-        )
+            user=request.user, recipe=recipe,)
         if created:
             serializer = self.get_serializer(instance=recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)  # TODO implement custom error message?
 
-    def get_queryset(self):
-        recipe_id = self.kwargs.get('recipe_id')
-        recipe = get_object_or_404(Recipe, pk=recipe_id)
-        favoritees = recipe.is_favorited
-        return favoritees
+    # def get_queryset(self):
+    #     recipe_id = self.kwargs.get('recipe_id')
+    #     recipe = get_object_or_404(Recipe, pk=recipe_id)
+    #     favorite_recipes = recipe.is_favorited
+    #     return favorite_recipes
 
     def delete(self, request, *args, **kwargs):
         recipe_id = kwargs.get('recipe_id')
