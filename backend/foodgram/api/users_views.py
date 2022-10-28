@@ -6,11 +6,12 @@ from api.recipe_serializers import RecipeSerializer
 from loggers import formatter, logger_users_views
 from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-# from .permissions import IsOwnerOrReadOnly
 from users.models import ADMIN, USER, User, Subscription
 from django.shortcuts import get_object_or_404
+
+from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
 
 LOG_NAME = 'logger_users_views.log'
 
@@ -24,6 +25,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticatedOrReadOnlyOrRegister]
 
     def create(self, request, *args, **kwargs):
         serializer = CreateUserSerializer(data=request.data)
@@ -54,7 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             user.set_password(serializer.validated_data['new_password'])
             user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
@@ -76,7 +78,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class SubscriptionViewSet(mixins.CreateModelMixin,
                           mixins.DestroyModelMixin,
-                          mixins.ListModelMixin,
                           viewsets.GenericViewSet,
                           ):
     serializer_class = SubscriptionSerializer
@@ -90,6 +91,7 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
         return following_authors
 
     def create(self, request, *args, **kwargs):
+        logger_users_views.debug(request)
         author_id = kwargs.get('user_id')
         author = get_object_or_404(User, id=author_id)
         if author == request.user:
@@ -107,4 +109,3 @@ class SubscriptionViewSet(mixins.CreateModelMixin,
         instance = get_object_or_404(Subscription, follower=request.user, author=author)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-

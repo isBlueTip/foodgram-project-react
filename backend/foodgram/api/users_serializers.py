@@ -48,7 +48,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        # fields = '__all__'  # TODO why __all__?
         fields = ['email',
                   'id',
                   'username',
@@ -59,6 +58,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, instance):
         user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
         try:
             Subscription.objects.get(follower=user, author=instance)
         except Subscription.DoesNotExist:
@@ -77,7 +78,6 @@ class PasswordSerializer(serializers.ModelSerializer):
                   ]
 
     def validate_current_password(self, value):
-        print(self.context)
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError({'current_password': 'current password is incorrect'})
@@ -127,4 +127,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, instance):
         return len(Recipe.objects.filter(author=instance))
-
