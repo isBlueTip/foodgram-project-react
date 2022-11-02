@@ -61,11 +61,9 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
-        try:
-            Subscription.objects.get(follower=user, author=instance)
-        except Subscription.DoesNotExist:
-            return False
-        return True
+        if Subscription.objects.filter(follower=user, author=instance).exists():
+            return True
+        return False
 
 
 class PasswordSerializer(serializers.ModelSerializer):
