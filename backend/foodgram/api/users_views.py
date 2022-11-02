@@ -70,12 +70,10 @@ class UserViewSet(viewsets.ModelViewSet):
     def set_user_password(self, request):
         user = self.request.user
         serializer = self.get_serializer(data=self.request.data)
-        if serializer.is_valid(raise_exception=True):
-            user.set_password(serializer.validated_data["new_password"])
-            user.save()
-            return Response(status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user.set_password(serializer.validated_data["new_password"])
+        user.save()
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(
         detail=False,
