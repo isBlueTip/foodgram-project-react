@@ -46,7 +46,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=200, verbose_name="Название блюда")
     author = models.ForeignKey(
         User,
-        related_name="recipe",
+        related_name="recipes",
         on_delete=models.PROTECT,
         verbose_name="Автор",
     )
@@ -57,7 +57,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientQuantity",
-        related_name="recipe",
+        related_name="recipes",
         verbose_name="Список ингредиентов",
         blank=False,
     )
