@@ -1,5 +1,7 @@
 import logging
 
+from django.db.models import Sum, Count
+
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (
@@ -45,18 +47,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path="download_shopping_cart",
     )
     def cart(self, request):
-        cart = Recipe.objects.filter(cart__user=request.user)
+        cart = IngredientQuantity.objects.values(
+            'ingredient__name',
+            'quantity',
+            'ingredient__measurement_unit',
+        ).order_by('ingredient__id').annotate(total=Sum('ingredient__ingredientquantity__quantity'))
         ingredients = {}
-        for recipe in cart:
-            ingredient_quantities = IngredientQuantity.objects.filter(recipe=recipe)
-            for ingredient in ingredient_quantities.iterator():
-                name = ingredient.ingredient.name
-                qty = ingredient.quantity
-                units = ingredient.ingredient.measurement_unit
-                if name in ingredients.keys():
-                    ingredients[name][0] += qty
-                else:
-                    ingredients[name] = [qty, units]
+        for ingredient in cart.iterator():
+            name = ingredient['ingredient__name']
+            if name in ingredients.keys():
+                continue
+            total = ingredient['total']
+            units = ingredient['ingredient__measurement_unit']
+            ingredients[name] = [total, units]
 
         response = HttpResponse(content_type="text/plain; charset=utf-8")
         response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
