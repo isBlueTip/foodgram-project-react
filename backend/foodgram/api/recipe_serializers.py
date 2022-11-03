@@ -30,11 +30,9 @@ class AuthorSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
-        try:
-            Subscription.objects.get(follower=user, author=instance)
-        except Subscription.DoesNotExist:
-            return False
-        return True
+        if Subscription.objects.filter(follower=user, author=instance).exists():
+            return True
+        return False
 
 
 class IngredientQuantitySerializer(serializers.ModelSerializer):
@@ -119,21 +117,17 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
-        try:
-            Favorite.objects.get(user=user, recipe=instance)
-        except Favorite.DoesNotExist:
-            return False
-        return True
+        if Favorite.objects.filter(user=user, recipe=instance).exists():
+            return True
+        return False
 
     def get_is_in_shopping_cart(self, instance):
         user = self.context.get("request").user
         if user.is_anonymous:
             return False
-        try:
-            Cart.objects.get(user=user, recipe=instance)
-        except Cart.DoesNotExist:
-            return False
-        return True
+        if Cart.objects.filter(user=user, recipe=instance).exists():
+            return True
+        return False
 
     def to_internal_value(self, data):
         raw_tags = data.get("tags")
@@ -147,11 +141,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, value):
         for recipe_ingredient in value:
-            ingredient = int(recipe_ingredient["ingredient"]["id"])
-            try:
-                ingredient = Ingredient.objects.get(id=ingredient)
-            except Exception as e:
-                msg = f"ингредиента с номером {ingredient} нет в списке"
+            ingredient_id = int(recipe_ingredient["ingredient"]["id"])
+            ingredient = Ingredient.objects.filter(id=ingredient_id)
+            logger_recipe_serializers.debug(f'ingredient = {ingredient}')
+            if not ingredient.exists():
+                msg = f"ингредиента с номером {ingredient_id} нет в списке"
                 raise serializers.ValidationError(msg)
         return value
 
