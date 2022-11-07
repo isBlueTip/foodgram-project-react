@@ -64,7 +64,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
 
-    id = serializers.CharField()
+    # id = serializers.CharField()
 
     class Meta:
         model = Tag
@@ -76,6 +76,7 @@ class TagSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = [
+            "is",
             "name",
             "color",
             "slug",
@@ -85,10 +86,11 @@ class TagSerializer(serializers.ModelSerializer):
             "id",
         ]
 
-
 class RecipeSerializer(serializers.ModelSerializer):
 
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, source='tag_set')
+    # tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    # tags = TagSerializer
     author = AuthorSerializer(read_only=True, default=serializers.CurrentUserDefault())
     ingredients = IngredientQuantitySerializer(
         source="ingredientquantity_set",
@@ -130,52 +132,66 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def to_internal_value(self, data):
-        raw_tags = data.get("tags")
-        tags = []
-        if raw_tags:
-            for tag in raw_tags:
-                tags.append({"id": tag})
-        data["tags"] = tags
+        logger_recipe_serializers.debug(f'data in beginning of my to_internal_value = {data}')
+    #     raw_tags = data.get("tags")
+    #     logger_recipe_serializers.debug(f'raw_tags = {raw_tags}')
+    #     tags = []
+    #     if raw_tags:
+    #         for tag in raw_tags:
+    #             tags.append({"id": tag})
+    #     logger_recipe_serializers.debug(f'tags = {tags}')
+    #     data["tags"] = tags
         res = super(RecipeSerializer, self).to_internal_value(data)
         return res
 
     def validate_ingredients(self, value):
-        for recipe_ingredient in value:
-            ingredient_id = int(recipe_ingredient["ingredient"]["id"])
-            ingredient = Ingredient.objects.filter(id=ingredient_id)
-            logger_recipe_serializers.debug(f'ingredient = {ingredient}')
+        pk_list = [int(ingredient['ingredient']['id']) for ingredient in value]
+
+        for pk in pk_list:
+            ingredient = Ingredient.objects.filter(id=pk)
+            if pk_list.count(pk) > 1:
+                msg = f"ингредиент с номером {pk} в рецепте может быть только один"
+                raise serializers.ValidationError(msg)
             if not ingredient.exists():
-                msg = f"ингредиента с номером {ingredient_id} нет в списке"
+                msg = f"ингредиента с номером {pk} нет в списке"
                 raise serializers.ValidationError(msg)
         return value
 
     def create_ingredients(self, instance, ingredients):
 
-        temp_ingredients = []
+        ingredinets_bulk = []
 
         for recipe_ingredient in ingredients:
             ingredient = Ingredient.objects.get(
                 id=int(recipe_ingredient["ingredient"]["id"]))
             quantity = int(recipe_ingredient["quantity"])
-            temp_ingredients.append([ingredient, quantity])
+            ingredinets_bulk.append([ingredient, quantity])
         obj = IngredientQuantity.objects.bulk_create(
-            [(IngredientQuantity(recipe=instance, ingredient=item[0], quantity=item[1],)) for item in temp_ingredients]
+            [(IngredientQuantity(recipe=instance, ingredient=item[0], quantity=item[1],)) for item in ingredinets_bulk]
         )
 
     def create(self, validated_data):
+        # logger_recipe_serializers.debug(f'validated_data = {validated_data}')
         author = self.context.get("request").user
         tags = validated_data.pop("tags", None)
+        # logger_recipe_serializers.debug(f'tags = {tags}')
         ingredients = validated_data.pop("ingredientquantity_set")
         instance = Recipe.objects.create(author=author, **validated_data)
         instance.tags.set([int(tag["id"]) for tag in tags])
+        # tags = [tag.id for tag in tags]
         self.create_ingredients(instance, ingredients)
         return instance
 
     def update(self, instance, validated_data):
+        logger_recipe_serializers.debug(f'validated_data_update = {validated_data}')
         tags = validated_data.pop("tags", None)
         ingredients = validated_data.pop("ingredientquantity_set")
         super().update(instance, validated_data)
-        instance.tags.set([int(tag["id"]) for tag in tags])
+
+        # instance.tags.set([int(tag["id"]) for tag in tags])
+        logger_recipe_serializers.debug(f'[tag.id for tag in tags] = {[tag.id for tag in tags]}')
+        instance.tags.set([tag.id for tag in tags])
+
         IngredientQuantity.objects.filter(recipe=instance).delete()
         self.create_ingredients(instance, ingredients)
         instance.save()
