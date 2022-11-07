@@ -78,7 +78,7 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     pagination_class = None
     permission_classes = [
-        AllowAny,
+        IsAdminOrIsAuthorOrReadOnly,
     ]
 
 
