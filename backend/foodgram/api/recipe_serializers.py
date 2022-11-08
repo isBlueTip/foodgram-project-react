@@ -6,6 +6,8 @@ from recipes.models import Cart, Favorite, Ingredient, IngredientQuantity, Recip
 from rest_framework import serializers
 from users.models import Subscription, User
 
+from collections import OrderedDict
+
 LOG_NAME = "logs/logger_recipe_serializers.log"
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
@@ -64,7 +66,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
 
-    # id = serializers.CharField()
+    id = serializers.CharField()
 
     class Meta:
         model = Tag
@@ -86,11 +88,10 @@ class TagSerializer(serializers.ModelSerializer):
             "id",
         ]
 
+
 class RecipeSerializer(serializers.ModelSerializer):
 
-    tags = TagSerializer(many=True, source='tag_set')
-    # tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    # tags = TagSerializer
+    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
     author = AuthorSerializer(read_only=True, default=serializers.CurrentUserDefault())
     ingredients = IngredientQuantitySerializer(
         source="ingredientquantity_set",
@@ -131,22 +132,20 @@ class RecipeSerializer(serializers.ModelSerializer):
             return True
         return False
 
-    def to_internal_value(self, data):
-        logger_recipe_serializers.debug(f'data in beginning of my to_internal_value = {data}')
-    #     raw_tags = data.get("tags")
-    #     logger_recipe_serializers.debug(f'raw_tags = {raw_tags}')
-    #     tags = []
-    #     if raw_tags:
-    #         for tag in raw_tags:
-    #             tags.append({"id": tag})
-    #     logger_recipe_serializers.debug(f'tags = {tags}')
-    #     data["tags"] = tags
-        res = super(RecipeSerializer, self).to_internal_value(data)
-        return res
+    def to_representation(self, instance):
+        ret = super(RecipeSerializer, self).to_representation(instance)
+
+        for i, tag in enumerate(ret["tags"]):
+            tag = Tag.objects.get(id=tag)
+            ret["tags"][i] = OrderedDict()
+            ret["tags"][i]['id'] = str(tag.id)
+            ret["tags"][i]['name'] = tag.name
+            ret["tags"][i]['color'] = tag.color
+            ret["tags"][i]['slug'] = tag.slug
+        return ret
 
     def validate_ingredients(self, value):
         pk_list = [int(ingredient['ingredient']['id']) for ingredient in value]
-
         for pk in pk_list:
             ingredient = Ingredient.objects.filter(id=pk)
             if pk_list.count(pk) > 1:
@@ -171,26 +170,22 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        # logger_recipe_serializers.debug(f'validated_data = {validated_data}')
         author = self.context.get("request").user
         tags = validated_data.pop("tags", None)
-        # logger_recipe_serializers.debug(f'tags = {tags}')
         ingredients = validated_data.pop("ingredientquantity_set")
         instance = Recipe.objects.create(author=author, **validated_data)
-        instance.tags.set([int(tag["id"]) for tag in tags])
-        # tags = [tag.id for tag in tags]
+        # instance.tags.set([int(tag["id"]) for tag in tags])
+        if tags:
+            instance.tags.set([tag.id for tag in tags])
         self.create_ingredients(instance, ingredients)
         return instance
 
     def update(self, instance, validated_data):
-        logger_recipe_serializers.debug(f'validated_data_update = {validated_data}')
         tags = validated_data.pop("tags", None)
         ingredients = validated_data.pop("ingredientquantity_set")
         super().update(instance, validated_data)
-
-        # instance.tags.set([int(tag["id"]) for tag in tags])
-        logger_recipe_serializers.debug(f'[tag.id for tag in tags] = {[tag.id for tag in tags]}')
-        instance.tags.set([tag.id for tag in tags])
+        if tags:
+            instance.tags.set([tag.id for tag in tags])
 
         IngredientQuantity.objects.filter(recipe=instance).delete()
         self.create_ingredients(instance, ingredients)
