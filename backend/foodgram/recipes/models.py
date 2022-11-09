@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 
-
 User = get_user_model()
 
 
@@ -16,11 +15,9 @@ class Tag(models.Model):
         max_length=8,
         verbose_name="Цвет в HEX-кодировке",
     )
-    slug = (
-        models.SlugField(
-            max_length=32,
-            verbose_name="Slug-адрес",
-        )
+    slug = models.SlugField(
+        max_length=32,
+        verbose_name="Slug-адрес",
     )
 
     def __str__(self):
@@ -28,7 +25,10 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=200, verbose_name="Название ингредиента")
+    name = models.CharField(
+        max_length=200,
+        verbose_name="Название ингредиента"
+    )
     measurement_unit = models.CharField(
         max_length=200,
         verbose_name="Единица измерения",
@@ -61,7 +61,8 @@ class Recipe(models.Model):
         blank=False,
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(360)], verbose_name="Время приготовления"
+        validators=[MaxValueValidator(360)],
+        verbose_name="Время приготовления"
     )
     image = models.ImageField(
         upload_to="recipes/",
@@ -107,8 +108,8 @@ class Favorite(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['recipe', 'user'],
-                name='unique_favorite_recipe',
+                fields=["recipe", "user"],
+                name="unique_favorite_recipe",
             )
         ]
         verbose_name = "избранное"
@@ -130,8 +131,8 @@ class IngredientQuantity(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['recipe', 'ingredient'],
-                name='unique_recipe_ingredient',
+                fields=["recipe", "ingredient"],
+                name="unique_recipe_ingredient",
             )
         ]
 
@@ -153,8 +154,8 @@ class Cart(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_cart',
+                fields=["user", "recipe"],
+                name="unique_cart",
             )
         ]
         verbose_name = "список покупок"

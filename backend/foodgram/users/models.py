@@ -58,8 +58,8 @@ class Subscription(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['follower', 'author'],
-                name='unique_subscription',
+                fields=["follower", "author"],
+                name="unique_subscription",
             )
         ]
         verbose_name = "избранное"

@@ -1,19 +1,15 @@
 import logging
 
-from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
-from api.users_serializers import (
-    CreateUserSerializer,
-    PasswordSerializer,
-    SubscriptionSerializer,
-    BaseUserSerializer,
-)
 from django.shortcuts import get_object_or_404
-from loggers import formatter, logger_users_views
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-
 from rest_framework.response import Response
+
+from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
+from api.users_serializers import (BaseUserSerializer, CreateUserSerializer,
+                                   PasswordSerializer, SubscriptionSerializer)
+from loggers import formatter, logger_users_views
 from users.models import Subscription, User
 
 LOG_NAME = "logs/logger_users_views.log"
@@ -126,6 +122,10 @@ class SubscriptionViewSet(
     def delete(self, request, *args, **kwargs):
         author_id = kwargs.get("user_id")
         author = get_object_or_404(User, id=author_id)
-        instance = get_object_or_404(Subscription, follower=request.user, author=author)
+        instance = get_object_or_404(
+            Subscription,
+            follower=request.user,
+            author=author
+        )
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

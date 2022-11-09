@@ -1,12 +1,13 @@
 import logging
+from collections import OrderedDict
 
 from drf_extra_fields.fields import Base64ImageField
-from loggers import formatter, logger_recipe_serializers
-from recipes.models import Cart, Favorite, Ingredient, IngredientQuantity, Recipe, Tag
 from rest_framework import serializers
-from api.base_serializers import BaseUserSerializer
 
-from collections import OrderedDict
+from api.base_serializers import BaseUserSerializer
+from loggers import formatter, logger_recipe_serializers
+from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
+                            Recipe, Tag)
 
 LOG_NAME = "logs/logger_recipe_serializers.log"
 file_handler = logging.FileHandler(LOG_NAME)
@@ -18,7 +19,9 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
 
     id = serializers.CharField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
     amount = serializers.CharField(source="quantity")
 
     class Meta:
@@ -68,8 +71,11 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
 
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
-    author = BaseUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    tags = serializers.PrimaryKeyRelatedField(many=True,
+                                              queryset=Tag.objects.all())
+    author = BaseUserSerializer(
+        read_only=True, default=serializers.CurrentUserDefault()
+    )
     ingredients = IngredientQuantitySerializer(
         source="ingredientquantity_set",
         many=True,
@@ -115,18 +121,20 @@ class RecipeSerializer(serializers.ModelSerializer):
         for i, tag in enumerate(ret["tags"]):
             tag = Tag.objects.get(id=tag)
             ret["tags"][i] = OrderedDict()
-            ret["tags"][i]['id'] = str(tag.id)
-            ret["tags"][i]['name'] = tag.name
-            ret["tags"][i]['color'] = tag.color
-            ret["tags"][i]['slug'] = tag.slug
+            ret["tags"][i]["id"] = str(tag.id)
+            ret["tags"][i]["name"] = tag.name
+            ret["tags"][i]["color"] = tag.color
+            ret["tags"][i]["slug"] = tag.slug
         return ret
 
     def validate_ingredients(self, value):
-        pk_list = [int(ingredient['ingredient']['id']) for ingredient in value]
+        pk_list = [int(ingredient["ingredient"]["id"])
+                   for ingredient in value]
         for pk in pk_list:
             ingredient = Ingredient.objects.filter(id=pk)
             if pk_list.count(pk) > 1:
-                msg = f"ингредиент с номером {pk} в рецепте может быть только один"
+                msg = (f"ингредиент с номером {pk}"
+                       f" в рецепте может быть только один")
                 raise serializers.ValidationError(msg)
             if not ingredient.exists():
                 msg = f"ингредиента с номером {pk} нет в списке"
@@ -139,11 +147,21 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         for recipe_ingredient in ingredients:
             ingredient = Ingredient.objects.get(
-                id=int(recipe_ingredient["ingredient"]["id"]))
+                id=int(recipe_ingredient["ingredient"]["id"])
+            )
             quantity = int(recipe_ingredient["quantity"])
             ingredinets_bulk.append([ingredient, quantity])
         obj = IngredientQuantity.objects.bulk_create(
-            [(IngredientQuantity(recipe=instance, ingredient=item[0], quantity=item[1],)) for item in ingredinets_bulk]
+            [
+                (
+                    IngredientQuantity(
+                        recipe=instance,
+                        ingredient=item[0],
+                        quantity=item[1],
+                    )
+                )
+                for item in ingredinets_bulk
+            ]
         )
 
     def create(self, validated_data):

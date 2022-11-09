@@ -1,6 +1,7 @@
 import logging
 
 import django_filters
+
 from loggers import formatter, logger_filters
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import User
@@ -40,16 +41,14 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset
         if value == "0":
             return queryset
-        queryset = queryset.filter(favorite__user=self.user)
-        return queryset
+        return queryset.filter(favorite__user=self.user)
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         if self.user.is_anonymous:
             return queryset
         if value == "0":
             return queryset
-        queryset = queryset.filter(cart__user=self.user)
-        return queryset
+        return queryset.filter(cart__user=self.user)
 
     class Meta:
         model = Recipe
@@ -59,7 +58,10 @@ class RecipeFilter(django_filters.FilterSet):
 
 
 class IngredientFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(field_name="name", lookup_expr="istartswith")
+    name = django_filters.CharFilter(
+        field_name="name",
+        lookup_expr="istartswith"
+    )
 
     class Meta:
         model = Ingredient

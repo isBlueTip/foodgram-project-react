@@ -1,12 +1,13 @@
 import logging
 
-from api.recipe_serializers import CartFavoriteSerializer
 from django.contrib.auth.password_validation import validate_password
+from rest_framework import serializers
+
+from api.base_serializers import BaseUserSerializer
+from api.recipe_serializers import CartFavoriteSerializer
 from loggers import formatter, logger_users_serializers
 from recipes.models import Recipe
-from rest_framework import serializers
 from users.models import User
-from api.base_serializers import BaseUserSerializer
 
 LOG_NAME = "logs/logger_users_serializers.log"
 
@@ -69,7 +70,11 @@ class PasswordSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(BaseUserSerializer):
-    recipes = CartFavoriteSerializer(many=True, read_only=True, source="recipe")
+    recipes = CartFavoriteSerializer(
+        many=True,
+        read_only=True,
+        source="recipe"
+    )
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:

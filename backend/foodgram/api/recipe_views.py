@@ -1,23 +1,21 @@
 import logging
 
 from django.db.models import Sum
-
-from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminOrIsAuthorOrReadOnly
-from api.recipe_serializers import (
-    CartFavoriteSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    TagSerializer,
-)
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from loggers import formatter, logger_recipe_views
-from recipes.models import Cart, Favorite, Ingredient, IngredientQuantity, Recipe, Tag
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import IsAdminOrIsAuthorOrReadOnly
+from api.recipe_serializers import (CartFavoriteSerializer,
+                                    IngredientSerializer, RecipeSerializer,
+                                    TagSerializer)
+from loggers import formatter, logger_recipe_views
+from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
+                            Recipe, Tag)
 
 LOG_NAME = "logs/logger_recipe_views.log"
 
@@ -46,25 +44,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path="download_shopping_cart",
     )
     def cart(self, request):
-        cart = IngredientQuantity.objects.values(
-            'ingredient__name',
-            'quantity',
-            'ingredient__measurement_unit',
-        ).order_by('ingredient__id').annotate(total=Sum('ingredient__ingredientquantity__quantity'))
+        cart = (
+            IngredientQuantity.objects.values(
+                "ingredient__name",
+                "quantity",
+                "ingredient__measurement_unit",
+            )
+            .order_by("ingredient__id")
+            .annotate(total=Sum("ingredient__ingredientquantity__quantity"))
+        )
         ingredients = {}
         for ingredient in cart.iterator():
-            name = ingredient['ingredient__name']
+            name = ingredient["ingredient__name"]
             if name in ingredients.keys():
                 continue
-            total = ingredient['total']
-            units = ingredient['ingredient__measurement_unit']
+            total = ingredient["total"]
+            units = ingredient["ingredient__measurement_unit"]
             ingredients[name] = [total, units]
 
         response = HttpResponse(content_type="text/plain; charset=utf-8")
-        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        response["Content-Disposition"] = ('attachment;'
+                                           ' filename="shopping_list.txt"')
         for index, ingredient in enumerate(ingredients):
             response.write(
-                f"{index + 1}. {ingredient}: {ingredients[ingredient][0]} {ingredients[ingredient][1]}\n"
+                f"{index + 1}. {ingredient}: "
+                f"{ingredients[ingredient][0]} {ingredients[ingredient][1]}\n"
             )
         response.write("Приятного аппетита!")
         return response
@@ -88,19 +92,19 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class CartFavoriteMixin(mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+class CartFavoriteMixin(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     serializer_class = CartFavoriteSerializer
     permission_classes = [
         IsAuthenticated,
     ]
 
     def get_create_queryset(self, instance):
-        raise NotImplemented
+        raise NotImplementedError
 
     def get_delete_queryset(self, user, instance):
-        raise NotImplemented
+        raise NotImplementedError
 
     def create(self, request, *args, **kwargs):
         recipe_id = kwargs["recipe_id"]
@@ -121,7 +125,6 @@ class CartFavoriteMixin(mixins.CreateModelMixin,
 
 
 class FavoriteViewSet(CartFavoriteMixin):
-
     def get_create_queryset(self, instance):
         return Favorite.objects.get_or_create(
             user=self.request.user,
@@ -133,7 +136,6 @@ class FavoriteViewSet(CartFavoriteMixin):
 
 
 class CartViewSet(CartFavoriteMixin):
-
     def get_create_queryset(self, instance):
         return Cart.objects.get_or_create(
             user=self.request.user,
