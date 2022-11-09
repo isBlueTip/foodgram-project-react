@@ -24,7 +24,6 @@ logger_users_views.addHandler(file_handler)
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Viewset to work with User model."""
 
     queryset = User.objects.all()
     serializer_class = BaseUserSerializer
@@ -99,7 +98,6 @@ class SubscriptionViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Viewset to work with Subscription model."""
 
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]

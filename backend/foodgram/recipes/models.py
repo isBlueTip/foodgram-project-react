@@ -14,11 +14,10 @@ class Tag(models.Model):
     )
     color = models.CharField(
         max_length=8,
-        # validators=[(),],  # TODO write own HEX validator and delete hexfield from the project
         verbose_name="Цвет в HEX-кодировке",
     )
     slug = (
-        models.SlugField(  # TODO auto-fill and check existing slugs (custom validator?)
+        models.SlugField(
             max_length=32,
             verbose_name="Slug-адрес",
         )

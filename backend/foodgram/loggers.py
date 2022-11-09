@@ -1,8 +1,5 @@
 import logging
 
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.DEBUG)
-
 logger_filters = logging.getLogger(__name__)
 logger_filters.setLevel(logging.DEBUG)
 

@@ -27,7 +27,6 @@ logger_recipe_views.addHandler(file_handler)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Viewset to work with Recipe model."""
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
@@ -72,7 +71,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class TagViewSet(viewsets.ModelViewSet):
-    """Viewset to work with Tag model."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -83,7 +81,6 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Viewset to work with Ingredient model."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -124,7 +121,6 @@ class CartFavoriteMixin(mixins.CreateModelMixin,
 
 
 class FavoriteViewSet(CartFavoriteMixin):
-    """Viewset to work with Favorite model."""
 
     def get_create_queryset(self, instance):
         return Favorite.objects.get_or_create(
@@ -137,7 +133,6 @@ class FavoriteViewSet(CartFavoriteMixin):
 
 
 class CartViewSet(CartFavoriteMixin):
-    """Viewset to work with Cart model."""
 
     def get_create_queryset(self, instance):
         return Cart.objects.get_or_create(
