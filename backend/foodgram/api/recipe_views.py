@@ -91,67 +91,59 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class FavoriteViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class CartFavoriteMixin(mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = CartFavoriteSerializer
+    permission_classes = [
+        IsAuthenticated,
+    ]
+
+    def get_create_queryset(self, instance):
+        raise NotImplemented
+
+    def get_delete_queryset(self, user, instance):
+        raise NotImplemented
+
+    def create(self, request, *args, **kwargs):
+        recipe_id = kwargs["recipe_id"]
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instance, created = self.get_create_queryset(recipe)
+        if created:
+            serializer = self.get_serializer(instance=recipe)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        recipe_id = kwargs.get("recipe_id")
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        user = request.user
+        instance = self.get_delete_queryset(user, recipe)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteViewSet(CartFavoriteMixin):
     """Viewset to work with Favorite model."""
 
-    serializer_class = CartFavoriteSerializer
-    permission_classes = [
-        IsAuthenticated,
-    ]
-
-    def create(self, request, *args, **kwargs):
-        recipe_id = kwargs["recipe_id"]
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        instance, created = Favorite.objects.get_or_create(
-            user=request.user,
-            recipe=recipe,
+    def get_create_queryset(self, instance):
+        return Favorite.objects.get_or_create(
+            user=self.request.user,
+            recipe=instance,
         )
-        if created:
-            serializer = self.get_serializer(instance=recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, *args, **kwargs):
-        recipe_id = kwargs.get("recipe_id")
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-        instance = get_object_or_404(Favorite, user=user, recipe=recipe)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_delete_queryset(self, user, instance):
+        return get_object_or_404(Favorite, user=user, recipe=instance)
 
 
-class CartViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+class CartViewSet(CartFavoriteMixin):
     """Viewset to work with Cart model."""
 
-    serializer_class = CartFavoriteSerializer
-    permission_classes = [
-        IsAuthenticated,
-    ]
-
-    def create(self, request, *args, **kwargs):
-        recipe_id = kwargs["recipe_id"]
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        instance, created = Cart.objects.get_or_create(
-            user=request.user,
-            recipe=recipe,
+    def get_create_queryset(self, instance):
+        return Cart.objects.get_or_create(
+            user=self.request.user,
+            recipe=instance,
         )
-        if created:
-            serializer = self.get_serializer(instance=recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, *args, **kwargs):
-        recipe_id = kwargs.get("recipe_id")
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-        instance = get_object_or_404(Cart, user=user, recipe=recipe)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_delete_queryset(self, user, instance):
+        return get_object_or_404(Cart, user=user, recipe=instance)
