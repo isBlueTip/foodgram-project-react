@@ -5,7 +5,7 @@ from api.users_serializers import (
     CreateUserSerializer,
     PasswordSerializer,
     SubscriptionSerializer,
-    UserSerializer,
+    BaseUserSerializer,
 )
 from django.shortcuts import get_object_or_404
 from loggers import formatter, logger_users_views
@@ -27,7 +27,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """Viewset to work with User model."""
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = BaseUserSerializer
     permission_classes = [IsAuthenticatedOrReadOnlyOrRegister]
 
     def create(self, request, *args, **kwargs):

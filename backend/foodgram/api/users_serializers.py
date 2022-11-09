@@ -5,7 +5,8 @@ from django.contrib.auth.password_validation import validate_password
 from loggers import formatter, logger_users_serializers
 from recipes.models import Recipe
 from rest_framework import serializers
-from users.models import Subscription, User
+from users.models import User
+from api.base_serializers import BaseUserSerializer
 
 LOG_NAME = "logs/logger_users_serializers.log"
 
@@ -42,30 +43,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
         return user
 
 
-class UserSerializer(serializers.ModelSerializer):
-
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = [
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-        ]
-
-    def get_is_subscribed(self, instance):
-        user = self.context.get("request").user
-        if user.is_anonymous:
-            return False
-        if Subscription.objects.filter(follower=user, author=instance).exists():
-            return True
-        return False
-
-
 class PasswordSerializer(serializers.ModelSerializer):
     current_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(write_only=True, required=True)
@@ -91,23 +68,16 @@ class PasswordSerializer(serializers.ModelSerializer):
         return value
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+class SubscriptionSerializer(BaseUserSerializer):
     recipes = CartFavoriteSerializer(many=True, read_only=True, source="recipe")
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
             "recipes",
             "recipes_count",
-        ]
+        ] + BaseUserSerializer.Meta.fields
 
         read_only_fields = [
             "email",
@@ -118,14 +88,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             "is_subscribed",
             "recipes",
         ]
-
-    def get_is_subscribed(self, instance):
-        user = self.context.get("request").user
-        try:
-            Subscription.objects.get(follower=user, author=instance)
-        except Subscription.DoesNotExist:
-            return False
-        return True
 
     def get_recipes_count(self, instance):
         return len(Recipe.objects.filter(author=instance))

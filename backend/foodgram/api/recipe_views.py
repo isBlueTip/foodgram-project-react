@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Sum, Count
+from django.db.models import Sum
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly

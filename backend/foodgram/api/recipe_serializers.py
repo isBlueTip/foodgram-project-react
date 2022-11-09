@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from loggers import formatter, logger_recipe_serializers
 from recipes.models import Cart, Favorite, Ingredient, IngredientQuantity, Recipe, Tag
 from rest_framework import serializers
-from users.models import Subscription, User
+from api.base_serializers import BaseUserSerializer
 
 from collections import OrderedDict
 
@@ -12,29 +12,6 @@ LOG_NAME = "logs/logger_recipe_serializers.log"
 file_handler = logging.FileHandler(LOG_NAME)
 file_handler.setFormatter(formatter)
 logger_recipe_serializers.addHandler(file_handler)
-
-
-class AuthorSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = [
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-        ]
-
-    def get_is_subscribed(self, instance):
-        user = self.context.get("request").user
-        if user.is_anonymous:
-            return False
-        if Subscription.objects.filter(follower=user, author=instance).exists():
-            return True
-        return False
 
 
 class IngredientQuantitySerializer(serializers.ModelSerializer):
@@ -92,7 +69,7 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
 
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
-    author = AuthorSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    author = BaseUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
     ingredients = IngredientQuantitySerializer(
         source="ingredientquantity_set",
         many=True,
@@ -174,7 +151,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop("tags", None)
         ingredients = validated_data.pop("ingredientquantity_set")
         instance = Recipe.objects.create(author=author, **validated_data)
-        # instance.tags.set([int(tag["id"]) for tag in tags])
         if tags:
             instance.tags.set([tag.id for tag in tags])
         self.create_ingredients(instance, ingredients)
