@@ -56,7 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = {}
         for ingredient in cart.iterator():
             name = ingredient["ingredient__name"]
-            if name in ingredients.keys():
+            if name in ingredients:
                 continue
             total = ingredient["total"]
             units = ingredient["ingredient__measurement_unit"]
