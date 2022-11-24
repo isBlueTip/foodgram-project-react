@@ -122,10 +122,7 @@ class SubscriptionViewSet(
     def delete(self, request, *args, **kwargs):
         author_id = kwargs.get("user_id")
         author = get_object_or_404(User, id=author_id)
-        instance = get_object_or_404(
-            Subscription,
-            follower=request.user,
-            author=author
-        )
+        instance = get_object_or_404(Subscription,
+                                     follower=request.user, author=author)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

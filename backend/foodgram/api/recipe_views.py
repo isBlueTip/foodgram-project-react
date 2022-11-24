@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (CartFavoriteSerializer,
-                                    IngredientSerializer, RecipeSerializer,
-                                    TagSerializer)
+                                    IngredientSerializer, ReadRecipeSerializer,
+                                    TagSerializer, WriteRecipeSerializer)
 from loggers import formatter, logger_recipe_views
 from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
                             Recipe, Tag)
@@ -27,11 +27,16 @@ logger_recipe_views.addHandler(file_handler)
 class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     filterset_class = RecipeFilter
     permission_classes = [
         IsAdminOrIsAuthorOrReadOnly,
     ]
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return ReadRecipeSerializer
+        else:
+            return WriteRecipeSerializer
 
     @action(
         detail=False,
@@ -63,8 +68,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ingredients[name] = [total, units]
 
         response = HttpResponse(content_type="text/plain; charset=utf-8")
-        response["Content-Disposition"] = ('attachment;'
-                                           ' filename="shopping_list.txt"')
+        response["Content-Disposition"] = "attachment;" ' filename="shopping_list.txt"'
         for index, ingredient in enumerate(ingredients):
             response.write(
                 f"{index + 1}. {ingredient}: "

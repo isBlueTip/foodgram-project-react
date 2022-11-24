@@ -11,19 +11,16 @@ router.register("ingredients", IngredientViewSet, basename="ingredient")
 router.register("recipes", RecipeViewSet, basename="recipe")
 router.register(
     r"recipes/(?P<recipe_id>\d+)/favorite",
-    FavoriteViewSet,
-    basename="recipefavorite"
+    FavoriteViewSet, basename="recipefavorite"
 )
 router.register(
     r"recipes/(?P<recipe_id>\d+)/shopping_cart",
-    CartViewSet,
-    basename="cart"
+    CartViewSet, basename="cart"
 )
 router.register("tags", TagViewSet, basename="tag")
 router.register(
     r"users/(?P<user_id>\d+)/subscribe",
-    SubscriptionViewSet,
-    basename="subscription"
+    SubscriptionViewSet, basename="subscription"
 )
 router.register("users", UserViewSet, basename="user")
 

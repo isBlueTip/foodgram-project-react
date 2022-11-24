@@ -1,5 +1,4 @@
 import logging
-from collections import OrderedDict
 
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -19,9 +18,7 @@ class IngredientQuantitySerializer(serializers.ModelSerializer):
 
     id = serializers.CharField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(
-        source="ingredient.measurement_unit"
-    )
+    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
     amount = serializers.CharField(source="quantity")
 
     class Meta:
@@ -57,22 +54,10 @@ class TagSerializer(serializers.ModelSerializer):
             "slug",
         ]
 
-        read_only_fields = [
-            "is",
-            "name",
-            "color",
-            "slug",
-        ]
 
-        write_only_fields = [
-            "id",
-        ]
+class ReadRecipeSerializer(serializers.ModelSerializer):
 
-
-class RecipeSerializer(serializers.ModelSerializer):
-
-    tags = serializers.PrimaryKeyRelatedField(many=True,
-                                              queryset=Tag.objects.all())
+    tags = TagSerializer(many=True, read_only=True)
     author = BaseUserSerializer(
         read_only=True, default=serializers.CurrentUserDefault()
     )
@@ -111,26 +96,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return Cart.objects.filter(user=user, recipe=instance).exists()
 
-    def to_representation(self, instance):
-        ret = super(RecipeSerializer, self).to_representation(instance)
-
-        for i, tag in enumerate(ret["tags"]):
-            tag = Tag.objects.get(id=tag)
-            ret["tags"][i] = OrderedDict()
-            ret["tags"][i]["id"] = str(tag.id)
-            ret["tags"][i]["name"] = tag.name
-            ret["tags"][i]["color"] = tag.color
-            ret["tags"][i]["slug"] = tag.slug
-        return ret
-
     def validate_ingredients(self, value):
-        pk_list = [int(ingredient["ingredient"]["id"])
-                   for ingredient in value]
+        pk_list = [int(ingredient["ingredient"]["id"]) for ingredient in value]
         for pk in pk_list:
             ingredient = Ingredient.objects.filter(id=pk)
             if pk_list.count(pk) > 1:
-                msg = (f"ингредиент с номером {pk}"
-                       f" в рецепте может быть только один")
+                msg = f"ингредиент с номером {pk}" f" в рецепте может быть только один"
                 raise serializers.ValidationError(msg)
             if not ingredient.exists():
                 msg = f"ингредиента с номером {pk} нет в списке"
@@ -161,6 +132,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         author = self.context.get("request").user
         tags = validated_data.pop("tags", None)
+        logger_recipe_serializers.debug(f"tags = {tags}")
         ingredients = validated_data.pop("ingredientquantity_set")
         instance = Recipe.objects.create(author=author, **validated_data)
         if tags:
@@ -197,3 +169,8 @@ class CartFavoriteSerializer(serializers.ModelSerializer):
             "image",
             "cooking_time",
         ]
+
+
+class WriteRecipeSerializer(ReadRecipeSerializer):
+
+    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
