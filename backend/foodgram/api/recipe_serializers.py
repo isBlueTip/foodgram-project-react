@@ -55,9 +55,10 @@ class TagSerializer(serializers.ModelSerializer):
         ]
 
 
-class ReadRecipeSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
 
-    tags = TagSerializer(many=True, read_only=True)
+    tags = serializers.PrimaryKeyRelatedField(many=True,
+                                              queryset=Tag.objects.all())
     author = BaseUserSerializer(
         read_only=True, default=serializers.CurrentUserDefault()
     )
@@ -107,6 +108,16 @@ class ReadRecipeSerializer(serializers.ModelSerializer):
                 msg = f"ингредиента с номером {pk} нет в списке"
                 raise serializers.ValidationError(msg)
         return value
+
+    def to_representation(self, instance):
+        ret = super(RecipeSerializer, self).to_representation(instance)
+        tags = Tag.objects.filter(recipe=instance)
+
+        for i, tag in enumerate(tags):
+            data = TagSerializer().to_representation(tag)
+            ret["tags"][i] = data
+
+        return ret
 
     def create_ingredients(self, instance, ingredients):
 
@@ -169,8 +180,3 @@ class CartFavoriteSerializer(serializers.ModelSerializer):
             "image",
             "cooking_time",
         ]
-
-
-class WriteRecipeSerializer(ReadRecipeSerializer):
-
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())

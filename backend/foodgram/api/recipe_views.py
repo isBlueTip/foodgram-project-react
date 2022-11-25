@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (CartFavoriteSerializer,
-                                    IngredientSerializer, ReadRecipeSerializer,
-                                    TagSerializer, WriteRecipeSerializer)
+                                    IngredientSerializer, RecipeSerializer,
+                                    TagSerializer)
 from loggers import formatter, logger_recipe_views
 from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
                             Recipe, Tag)
@@ -28,15 +28,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
+    serializer_class = RecipeSerializer
     permission_classes = [
         IsAdminOrIsAuthorOrReadOnly,
     ]
-
-    def get_serializer_class(self):
-        if self.action in ["list", "retrieve"]:
-            return ReadRecipeSerializer
-        else:
-            return WriteRecipeSerializer
 
     @action(
         detail=False,
