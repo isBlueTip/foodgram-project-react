@@ -37,8 +37,8 @@ class User(AbstractUser):
 
     def __str__(self):
         if self.get_full_name():
-            return self.get_full_name()
-        return self.username
+            return self.get_full_name()[:32]
+        return self.username[:32]
 
 
 class Subscription(models.Model):
