@@ -12,10 +12,22 @@ user_2_first_name = 'Lucius'
 user_2_last_name = 'McLaren'
 user_2_email = 'empty@email.com'
 
+tag_1_name = 'name'
+tag_1_color = '0xe51515'
+tag_1_slug = 'tag_slug'
+tag_2_name = 'another tag name'
+tag_2_color = '0xa55613'
+tag_2_slug = 'another_slug'
 
-tag_slug = 'tag_slug'
-ingredient_name = 'test ingredient'
+ingredient_1_name = 'test ingredient'
+measurement_unit_1 = 'г'
+quantity_1 = 300
+quantity_2 = 550
+ingredient_2_name = 'another test ingredient'
+measurement_unit_2 = 'л'
+
 recipe_name = 'test recipe name'
+recipe_description = 'very long description' * 8
 cooking_time = 8
 
 
