@@ -25,8 +25,8 @@ class URLsTest(test.APITestCase):
         recipe = Recipe.objects.create(name=fixtures.recipe_name,
                                        author=URLsTest.user,
                                        cooking_time=fixtures.cooking_time)
-        tag = Tag.objects.create(slug=fixtures.tag_slug)
-        ingredient = Ingredient.objects.create(name=fixtures.ingredient_name)
+        tag = Tag.objects.create(slug=fixtures.tag_1_slug)
+        ingredient = Ingredient.objects.create(name=fixtures.ingredient_1_name)
         cls.authenticated_urls = fixtures.authenticated_urls + [
             '/api/users/' + str(cls.user.id) + '/',
         ]
