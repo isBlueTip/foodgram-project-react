@@ -39,7 +39,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             "get",
         ],
         permission_classes=[
-            AllowAny,
+            IsAuthenticated,
         ],
         url_path="download_shopping_cart",
     )
