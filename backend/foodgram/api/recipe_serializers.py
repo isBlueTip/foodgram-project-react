@@ -16,10 +16,10 @@ logger_recipe_serializers.addHandler(file_handler)
 
 class IngredientQuantitySerializer(serializers.ModelSerializer):
 
-    id = serializers.CharField(source="ingredient.id")
+    id = serializers.IntegerField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
     measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
-    amount = serializers.CharField(source="quantity")
+    amount = serializers.IntegerField(source="quantity")
 
     class Meta:
         model = IngredientQuantity
@@ -43,7 +43,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
 
-    id = serializers.CharField()
+    id = serializers.IntegerField()
 
     class Meta:
         model = Tag
@@ -114,6 +114,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = Tag.objects.filter(recipe=instance)
 
         for i, tag in enumerate(tags):
+            logger_recipe_serializers.debug('here')
             data = TagSerializer().to_representation(tag)
             ret["tags"][i] = data
 
