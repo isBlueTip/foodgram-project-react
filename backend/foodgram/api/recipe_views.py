@@ -40,13 +40,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_path="download_shopping_cart",
     )
     def cart(self, request):
+        user = request.user
         cart = (
             IngredientQuantity.objects.values(
                 "ingredient__name",
                 "quantity",
                 "ingredient__measurement_unit",
             )
-            .order_by("ingredient__id")
+            .order_by("ingredient__id").filter(recipe__cart__user=user)
             .annotate(total=Sum("ingredient__ingredientquantity__quantity"))
         )
         ingredients = {}
