@@ -106,7 +106,7 @@ class CartFavoriteMixin(
         raise NotImplementedError
 
     def create(self, request, *args, **kwargs):
-        recipe_id = kwargs["recipe_id"]
+        recipe_id = kwargs.get("recipe_id")
         recipe = get_object_or_404(Recipe, id=recipe_id)
         instance, created = self.get_create_queryset(recipe)
         if created:
