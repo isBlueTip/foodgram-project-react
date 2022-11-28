@@ -2,7 +2,7 @@ import logging
 
 import django_filters
 
-from loggers import formatter, logger_filters
+from loggers.loggers import formatter, logger_filters
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import User
 

@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from api.base_serializers import BaseUserSerializer
 from api.recipe_serializers import CartFavoriteSerializer
-from loggers import formatter, logger_users_serializers
+from loggers.loggers import formatter, logger_users_serializers
 from recipes.models import Recipe
 from users.models import User
 

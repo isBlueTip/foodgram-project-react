@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
 from api.users_serializers import (BaseUserSerializer, CreateUserSerializer,
                                    PasswordSerializer, SubscriptionSerializer)
-from loggers import formatter, logger_users_views
+from loggers.loggers import formatter, logger_users_views
 from users.models import Subscription, User
 
 LOG_NAME = "logs/logger_users_views.log"

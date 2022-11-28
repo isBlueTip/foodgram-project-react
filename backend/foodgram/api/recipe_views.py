@@ -13,7 +13,7 @@ from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (CartFavoriteSerializer,
                                     IngredientSerializer, RecipeSerializer,
                                     TagSerializer)
-from loggers import formatter, logger_recipe_views
+from loggers.loggers import formatter, logger_recipe_views
 from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
                             Recipe, Tag)
 

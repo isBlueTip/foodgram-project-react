@@ -5,7 +5,7 @@ from rest_framework import test
 from tests import fixtures
 from users.models import User
 from recipes.models import Recipe, Tag, Ingredient
-from loggers import formatter, logger_tests
+from loggers.loggers import formatter, logger_tests
 
 LOG_NAME = "logs/logger_tests.log"
 

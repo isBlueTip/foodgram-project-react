@@ -4,7 +4,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from api.base_serializers import BaseUserSerializer
-from loggers import formatter, logger_recipe_serializers
+from loggers.loggers import formatter, logger_recipe_serializers
 from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
                             Recipe, Tag)
 
