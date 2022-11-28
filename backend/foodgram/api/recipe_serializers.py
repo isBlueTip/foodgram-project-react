@@ -112,12 +112,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super(RecipeSerializer, self).to_representation(instance)
         tags = Tag.objects.filter(recipe=instance)
-
-        for i, tag in enumerate(tags):
-            logger_recipe_serializers.debug('here')
-            data = TagSerializer().to_representation(tag)
-            ret["tags"][i] = data
-
+        data = TagSerializer(many=True).to_representation(tags)
+        ret["tags"] = data
         return ret
 
     def create_ingredients(self, instance, ingredients):
