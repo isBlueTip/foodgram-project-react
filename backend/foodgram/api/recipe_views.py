@@ -51,7 +51,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             .annotate(total=Sum("ingredient__ingredientquantity__quantity"))
         )
         ingredients = {}
-        for ingredient in cart.iterator():
+        for ingredient in cart:
             name = ingredient["ingredient__name"]
             if name in ingredients:
                 continue
