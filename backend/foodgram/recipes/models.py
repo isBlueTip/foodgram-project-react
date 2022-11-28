@@ -123,9 +123,6 @@ class IngredientQuantity(models.Model):
         blank=False,
     )
 
-    def __str__(self):
-        return f"{self.ingredient}, {self.quantity}"
-
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -133,6 +130,9 @@ class IngredientQuantity(models.Model):
                 name="unique_recipe_ingredient",
             )
         ]
+
+    def __str__(self):
+        return f"{self.ingredient}, {self.quantity}"
 
 
 class Cart(models.Model):
