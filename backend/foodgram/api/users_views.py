@@ -25,15 +25,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = BaseUserSerializer
     permission_classes = [IsAuthenticatedOrReadOnlyOrRegister]
 
-    def create(self, request, *args, **kwargs):
-        serializer = CreateUserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
-
     @action(
         detail=False,
         methods=[
@@ -106,7 +97,6 @@ class SubscriptionViewSet(
         return following_authors
 
     def create(self, request, *args, **kwargs):
-        logger_users_views.debug(request)
         author_id = kwargs.get("user_id")
         author = get_object_or_404(User, id=author_id)
         if author == request.user:
