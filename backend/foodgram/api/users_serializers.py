@@ -70,8 +70,7 @@ class PasswordSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(BaseUserSerializer):
-    recipes = CartFavoriteSerializer(many=True,
-                                     read_only=True, source="recipe")
+    recipes = CartFavoriteSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
