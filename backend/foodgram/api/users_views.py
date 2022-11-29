@@ -7,16 +7,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
-from api.users_serializers import (BaseUserSerializer, CreateUserSerializer,
+from api.users_serializers import (BaseUserSerializer,
                                    PasswordSerializer, SubscriptionSerializer)
-from loggers.loggers import formatter, logger_users_views
 from users.models import Subscription, User
 
-LOG_NAME = "logs/logger_users_views.log"
-
-file_handler = logging.FileHandler(LOG_NAME)
-file_handler.setFormatter(formatter)
-logger_users_views.addHandler(file_handler)
+logger = logging.getLogger('logger')
 
 
 class UserViewSet(viewsets.ModelViewSet):

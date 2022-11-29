@@ -5,15 +5,10 @@ from rest_framework import serializers
 
 from api.base_serializers import BaseUserSerializer
 from api.recipe_serializers import CartFavoriteSerializer
-from loggers.loggers import formatter, logger_users_serializers
 from recipes.models import Recipe
 from users.models import User
 
-LOG_NAME = "logs/logger_users_serializers.log"
-
-file_handler = logging.FileHandler(LOG_NAME)
-file_handler.setFormatter(formatter)
-logger_users_serializers.addHandler(file_handler)
+logger = logging.getLogger('logger')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):

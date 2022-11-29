@@ -10,14 +10,9 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (IngredientSerializer, RecipeSerializer,
                                     TagSerializer)
-from loggers.loggers import formatter, logger_recipe_views
 from recipes.models import (Ingredient, IngredientQuantity, Recipe, Tag)
 
-LOG_NAME = "logs/logger_recipe_views.log"
-
-file_handler = logging.FileHandler(LOG_NAME)
-file_handler.setFormatter(formatter)
-logger_recipe_views.addHandler(file_handler)
+logger = logging.getLogger('logger')
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

@@ -4,14 +4,10 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from api.base_serializers import BaseUserSerializer
-from loggers.loggers import formatter, logger_recipe_serializers
 from recipes.models import (Cart, Favorite, Ingredient, IngredientQuantity,
                             Recipe, Tag)
 
-LOG_NAME = "logs/logger_recipe_serializers.log"
-file_handler = logging.FileHandler(LOG_NAME)
-file_handler.setFormatter(formatter)
-logger_recipe_serializers.addHandler(file_handler)
+logger = logging.getLogger('logger')
 
 
 class IngredientQuantitySerializer(serializers.ModelSerializer):

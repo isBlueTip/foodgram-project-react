@@ -2,14 +2,10 @@ import logging
 
 import django_filters
 
-from loggers.loggers import formatter, logger_filters
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import User
 
-LOG_NAME = "logs/logger_filters.log"
-file_handler = logging.FileHandler(LOG_NAME)
-file_handler.setFormatter(formatter)
-logger_filters.addHandler(file_handler)
+logger = logging.getLogger('logger')
 
 
 class RecipeFilter(django_filters.FilterSet):
