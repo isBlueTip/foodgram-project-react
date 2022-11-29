@@ -26,15 +26,24 @@ recipe_description = "very long description" * 8
 cooking_time = 8
 
 
+tags_url = "/api/tags/"
+recipes_url = "/api/recipes/"
+ingredients_url = "/api/ingredients/"
+
 unauthenticated_urls = [
-    "/api/tags/",
-    "/api/recipes/",
-    "/api/ingredients/",
+    tags_url,
+    recipes_url,
+    ingredients_url,
 ]
 
+users_url = "/api/users/"
+user_self_info_url = "/api/users/me/"
+download_cart_url = "/api/recipes/download_shopping_cart/"
+subscriptions_url = "/api/users/subscriptions/"
+
 authenticated_urls = [
-    "/api/users/",
-    "/api/users/me/",
-    "/api/recipes/download_shopping_cart/",
-    "/api/users/subscriptions/",
+    users_url,
+    user_self_info_url,
+    download_cart_url,
+    subscriptions_url,
 ]
