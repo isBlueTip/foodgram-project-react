@@ -10,7 +10,7 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminOrIsAuthorOrReadOnly
 from api.recipe_serializers import (IngredientSerializer, RecipeSerializer,
                                     TagSerializer)
-from recipes.models import (Ingredient, IngredientQuantity, Recipe, Tag)
+from recipes.models import Ingredient, IngredientQuantity, Recipe, Tag
 
 logger = logging.getLogger('logger')
 

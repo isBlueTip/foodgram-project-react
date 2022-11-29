@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
-from api.users_serializers import (BaseUserSerializer,
-                                   PasswordSerializer, SubscriptionSerializer)
+from api.users_serializers import (BaseUserSerializer, PasswordSerializer,
+                                   SubscriptionSerializer)
 from users.models import Subscription, User
 
 logger = logging.getLogger('logger')
