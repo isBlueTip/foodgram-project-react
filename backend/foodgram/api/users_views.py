@@ -29,6 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
             IsAuthenticated,
         ],
         url_path="me",
+        url_name="me",
         name="View current user details",
     )
     def view_user_info(self, request):

@@ -5,6 +5,8 @@ from api.mixins import CartViewSet, FavoriteViewSet
 from api.recipe_views import IngredientViewSet, RecipeViewSet, TagViewSet
 from api.users_views import SubscriptionViewSet, UserViewSet
 
+app_name = "api"
+
 router = SimpleRouter()
 
 router.register("ingredients", IngredientViewSet, basename="ingredient")

@@ -33,6 +33,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             IsAuthenticated,
         ],
         url_path="download_shopping_cart",
+        url_name="download_shopping_cart",
     )
     def cart(self, request):
         user = request.user

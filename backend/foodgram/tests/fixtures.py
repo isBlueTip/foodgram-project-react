@@ -1,3 +1,5 @@
+from django.urls import reverse
+
 user_1_first_name = "H" * 12 + "e" * 12 + "r" * 12 + "oku"
 user_1_last_name = "Dows"
 user_1_username = "John"
@@ -26,9 +28,9 @@ recipe_description = "very long description" * 8
 cooking_time = 8
 
 
-tags_url = "/api/tags/"
-recipes_url = "/api/recipes/"
-ingredients_url = "/api/ingredients/"
+tags_url = reverse("api:tag-list")
+recipes_url = reverse("api:recipe-list")
+ingredients_url = reverse("api:ingredient-list")
 
 unauthenticated_urls = [
     tags_url,
@@ -36,10 +38,10 @@ unauthenticated_urls = [
     ingredients_url,
 ]
 
-users_url = "/api/users/"
-user_self_info_url = "/api/users/me/"
-download_cart_url = "/api/recipes/download_shopping_cart/"
-subscriptions_url = "/api/users/subscriptions/"
+users_url = reverse("api:user-list")
+user_self_info_url = reverse("api:user-me")
+download_cart_url = reverse("api:recipe-download_shopping_cart")
+subscriptions_url = reverse("api:user-subscriptions")
 
 authenticated_urls = [
     users_url,
