@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from users.models import User
+from users.models import Subscription, User
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -34,4 +34,20 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = "empty"
 
 
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = (
+        "follower",
+        "author",
+    )
+    list_editable = (
+        "author",
+    )
+    search_fields = (
+        "follower",
+        "author",
+    )
+    empty_value_display = "empty"
+
+
 admin.site.register(User, UserAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)
