@@ -5,19 +5,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
     default="django-insecure-$t)1g&4t@%_y!8cy_00-o9gud&cc#(xygh+org5i56%7!6$n7_",
 )
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://*.localhost:8000",
+    "http://0.0.0.0:8000",
+    "http://0.0.0.0",
 ]
 
 
@@ -91,7 +93,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME", default="foodgram_db"),
         "USER": os.getenv("POSTGRES_USER", default="postgres"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", default="root"),
-        'HOST': 'localhost',
+        'HOST': os.getenv('DB_HOST', default='db'),
         "PORT": os.getenv("DB_PORT", default="5432"),
     }
 }
@@ -122,7 +124,7 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_ROOT = "/home/bluetip/dev/foodgram-project-react/frontend/static/"
+STATIC_ROOT = "/app/static/"
 STATIC_URL = "/static/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
@@ -158,31 +160,31 @@ DJOSER = {
 }
 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} | {module} | {levelname} | {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'formatter': 'verbose',
-            'filename': 'logs/debug.log',
-        },
-    },
-    'loggers': {
-        'logger': {
-            'handlers': ['file'],
-            'level': 'DEBUG'
-        },
-    }
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': '{asctime} | {module} | {levelname} | {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'formatter': 'verbose',
+#             'filename': 'logs/debug.log',
+#         },
+#     },
+#     'loggers': {
+#         'logger': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG'
+#         },
+#     }
+# }
