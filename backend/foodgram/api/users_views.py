@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.permissions import IsAuthenticatedOrReadOnlyOrRegister
-from api.users_serializers import (BaseUserSerializer, PasswordSerializer,
-                                   SubscriptionSerializer)
+from api.users_serializers import (BaseUserSerializer, CreateUserSerializer,
+                                   PasswordSerializer, SubscriptionSerializer)
 from users.models import Subscription, User
 
 logger = logging.getLogger('logger')
@@ -17,8 +17,13 @@ logger = logging.getLogger('logger')
 class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
-    serializer_class = BaseUserSerializer
     permission_classes = [IsAuthenticatedOrReadOnlyOrRegister]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return CreateUserSerializer
+        else:
+            return BaseUserSerializer
 
     @action(
         detail=False,
@@ -89,7 +94,6 @@ class SubscriptionViewSet(
         follower = self.request.user
         users = User.objects.all()
         following_authors = users.filter(subscription__follower=follower)
-        logger_users_views.debug(following_authors)
         return following_authors
 
     def create(self, request, *args, **kwargs):
