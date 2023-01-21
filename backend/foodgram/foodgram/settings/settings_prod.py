@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv(
     default="django-insecure-$t)1g&4t@%_y!8cy_00-o9gud&cc#(xygh+org5i56%7!6$n7_",
 )
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -165,31 +165,31 @@ DJOSER = {
 }
 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'verbose': {
-#             'format': '{asctime} | {module} | {levelname} | {message}',
-#             'style': '{',
-#         },
-#         'simple': {
-#             'format': '{levelname} {message}',
-#             'style': '{',
-#         },
-#     },
-#     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'formatter': 'verbose',
-#             'filename': 'logs/debug.log',
-#         },
-#     },
-#     'loggers': {
-#         'logger': {
-#             'handlers': ['file'],
-#             'level': 'DEBUG'
-#         },
-#     }
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} | {module} | {levelname} | {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': 'logs/debug.log',
+        },
+    },
+    'loggers': {
+        'logger': {
+            'handlers': ['file'],
+            'level': 'DEBUG'
+        },
+    }
+}
