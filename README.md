@@ -45,6 +45,11 @@ python3 manage.py createsuperuser --email admin@admin.com --username admin -v 3
 Для проверки работоспособности, перейдите на http://127.0.0.1/
 ***
 
+## Данные для входа на сайт и в админку
+http://51.250.103.207/  
+email:  admin@admin.com  
+pass:   admin
+
 ## Пример .env файла
 
 ```
