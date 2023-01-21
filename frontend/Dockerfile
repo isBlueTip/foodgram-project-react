@@ -1,8 +1,20 @@
-# build env
-FROM node:13.12.0-alpine as build
+FROM node:15.13.0-alpine
+
+RUN mkdir /app
+
+COPY ./ /app
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . ./
+
 RUN npm run build
-CMD cp -r build result_build
+
+
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - frontend_build:/app/build
+    depends_on:
+      - backend
+    env_file:
+      - ./.env
