@@ -20,6 +20,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnlyOrRegister]
 
     def get_serializer_class(self):
+        if self.action == "subscriptions":
+            return SubscriptionSerializer
         if self.action == "create":
             return CreateUserSerializer
         else:
@@ -67,7 +69,6 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=[
             "get",
         ],
-        serializer_class=SubscriptionSerializer,
     )
     def subscriptions(self, request, *args, **kwargs):
         queryset = User.objects.filter(subscription__follower=request.user)

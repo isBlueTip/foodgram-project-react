@@ -70,10 +70,10 @@ class SubscriptionSerializer(BaseUserSerializer):
 
     class Meta:
         model = User
-        fields = [
+        fields = BaseUserSerializer.Meta.fields + [
             "recipes",
             "recipes_count",
-        ] + BaseUserSerializer.Meta.fields
+        ]
 
         read_only_fields = [
             "email",
