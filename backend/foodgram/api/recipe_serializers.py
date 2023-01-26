@@ -93,8 +93,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return Cart.objects.filter(user=user, recipe=instance).exists()
 
-    def validate_ingredients(self, value):
-        pk_list = [int(ingredient["ingredient"]["id"]) for ingredient in value]
+    def validate(self, attrs):
+        ret = super(RecipeSerializer, self).validate(attrs)
+        ingredients = attrs.get("ingredientquantity_set")
+        pk_list = [int(ingredient["ingredient"]["id"]) for ingredient in ingredients]
+
         for pk in pk_list:
             ingredient = Ingredient.objects.filter(id=pk)
             if pk_list.count(pk) > 1:
@@ -103,7 +106,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             if not ingredient.exists():
                 msg = f"ингредиента с номером {pk} нет в списке"
                 raise serializers.ValidationError(msg)
-        return value
+
+        for ingredient in ingredients:
+            if ingredient.get("quantity") < 0:
+                raise serializers.ValidationError("Количество ингредиента не может быть отрицательным!")
+        return ret
 
     def to_representation(self, instance):
         ret = super(RecipeSerializer, self).to_representation(instance)
@@ -114,12 +121,12 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, instance, ingredients):
 
-        ingredinets_bulk = []
+        ingredients_bulk = []
 
         for recipe_ingredient in ingredients:
             ingredient_id = int(recipe_ingredient["ingredient"]["id"])
             quantity = int(recipe_ingredient["quantity"])
-            ingredinets_bulk.append([ingredient_id, quantity])
+            ingredients_bulk.append([ingredient_id, quantity])
         IngredientQuantity.objects.bulk_create(
             [
                 (
@@ -129,14 +136,13 @@ class RecipeSerializer(serializers.ModelSerializer):
                         quantity=item[1],
                     )
                 )
-                for item in ingredinets_bulk
+                for item in ingredients_bulk
             ]
         )
 
     def create(self, validated_data):
         author = self.context.get("request").user
         tags = validated_data.pop("tags", None)
-        logger_recipe_serializers.debug(f"tags = {tags}")
         ingredients = validated_data.pop("ingredientquantity_set")
         instance = Recipe.objects.create(author=author, **validated_data)
         if tags:
