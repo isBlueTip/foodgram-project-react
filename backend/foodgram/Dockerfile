@@ -1,13 +1,12 @@
 FROM python:3.9-bullseye
 
-RUN mkdir /app
+WORKDIR /app
 RUN pip install --upgrade pip
 
-COPY /requirements_prod.txt /app
-RUN pip install -r /app/requirements_prod.txt --no-cache-dir
+COPY /requirements_prod.txt ./
+RUN pip install -r ./requirements_prod.txt --no-cache-dir
 
-COPY ./ /app
-WORKDIR /app
+COPY ./ ./
 
 RUN export DJANGO_SETTINGS_MODULE=foodgram.settings.settings_prod
 
